@@ -333,12 +333,6 @@ body{background:#080d19;color:#eff3ff}
 .standards-mark{border-color:#667fba;color:#a8bcf1;box-shadow:inset 0 0 25px #7895d222}
 .standards-points span{color:#d2dced;border-color:#34425a}
 .site-footer{background:#080d19;border-color:#26344b;color:#8493ac}.site-footer .brand{color:#edf3ff}
-.contract-banner{background:linear-gradient(110deg,#141f35,#171d36);border-color:#344563;box-shadow:0 14px 40px #0005}
-.contract-banner-label{color:#aabbe0}.contract-banner-copy strong{color:#edf3ff}
-.contract-copy-button{background:#263a60;border-color:#718cc6}.contract-copy-button:hover{background:#354f7e}
 .toast{background:#202e49;color:#f3f6ff}
-.gateway-contract{display:flex;align-items:center;gap:9px;color:#8393ae;font:8px var(--mono);letter-spacing:.08em}
-.gateway-contract b{color:#b8c7e4;font-weight:400;letter-spacing:.03em}
-.gateway-contract button{background:#182944;border:1px solid #40577c;color:#c6d6f5;padding:6px 8px;border-radius:4px;font:8px var(--mono);cursor:pointer}
-@media(max-width:680px){.gateway-contract{width:100%;justify-content:center;flex-wrap:wrap}.gateway-bottom{flex-wrap:wrap}.story-copy h1{color:#f1f4ff}}
+@media(max-width:680px){.gateway-bottom{flex-wrap:wrap}.story-copy h1{color:#f1f4ff}}
 @media(prefers-reduced-motion:reduce){.gateway-option,.media-art-ring,.art-orbit-dot,.art-scanline{animation:none!important;transition:none!important}}
