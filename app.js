@@ -166,7 +166,7 @@ function selectUploadFile(file){selectedUploadFile=file||null;const name=$("sele
 zone.addEventListener("drop",e=>{e.preventDefault();zone.classList.remove("drag");selectUploadFile(e.dataTransfer.files[0])});
 $("fileInput").addEventListener("change",e=>selectUploadFile(e.target.files[0]));
 
-$("mobileNav").addEventListener("click",()=>$("scanner").scrollIntoView({behavior:"smooth"}));
+
 supabase.auth.onAuthStateChange((_event,session)=>{if(session?.user){guestReady=true;loadHistory()}else guestReady=false});
 window.ORIGINVAULT_UPLOAD = processFile;
 ensureGuestSession().catch(err=>{guestReady=false;toast(String(err&&err.message||'Guest session failed'))});
