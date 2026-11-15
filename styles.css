@@ -305,3 +305,13 @@ body{font-family:'Manrope',Arial,sans-serif;direction:ltr}
 .result-card .technical-details summary{text-align:left}
 @media(max-width:760px){.media-scan-stage{margin-inline:12px;gap:10px;padding:11px}.media-kinds{display:none}.story-copy{text-align:center}.scope-item{gap:8px}.site-header{padding-inline:16px}}
 @media(prefers-reduced-motion:reduce){.scan-beam,.scan-wave,.scan-bars i{animation:none!important}}
+
+/* Token contract address banner */
+.contract-banner{margin:18px max(6.2vw,24px) 0;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:#172744;border:1px solid #2a4168;border-radius:10px;color:#fff;box-shadow:0 12px 30px rgba(25,45,78,.08)}
+.contract-banner-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+.contract-banner-label{font:8px var(--mono);letter-spacing:.15em;color:#9eb5df}
+.contract-banner-copy strong{font:10px var(--mono);letter-spacing:.07em;color:#f2f6ff;overflow-wrap:anywhere}
+.contract-copy-button{flex:none;display:inline-flex;align-items:center;gap:12px;padding:10px 13px;border:1px solid #6d8fd2;border-radius:5px;background:#294779;color:#fff;font:8px var(--mono);letter-spacing:.1em;cursor:pointer;transition:background .2s,border-color .2s}
+.contract-copy-button:hover{background:#365d9a;border-color:#9bb7ed}
+.contract-copy-button span{font-size:14px}
+@media(max-width:600px){.contract-banner{margin:12px 14px 0;padding:13px;gap:10px}.contract-banner-copy strong{font-size:8px}.contract-banner-label{font-size:7px}.contract-copy-button{padding:9px;font-size:7px;gap:6px}}
