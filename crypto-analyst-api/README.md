@@ -6,7 +6,7 @@ Python service for the optional Gemini and Kronos engines. The browser-only tech
 
 The repository-level `render.yaml` preserves the existing static website service and adds a separate **Free** Python web service named `originvault-crypto-analyst-api`. In the Render Dashboard, open the existing Blueprint and apply/sync the new service after this commit appears. Do not create a paid instance.
 
-The lightweight free deployment supports market-data, DEX OHLCV, derivatives, and optional Gemini/GoPlus routes. **Kronos is intentionally disabled** in this profile because loading its PyTorch model is not reliable within the free instance's 512 MB memory. The full `requirements.txt` and Dockerfile remain for a larger host. Render free services sleep after 15 minutes without traffic and may take about a minute to wake.
+The lightweight free deployment supports market-data, DEX OHLCV, multi-exchange derivatives aggregation (Binance, Bybit, OKX), and optional Gemini/GoPlus routes. **Kronos is intentionally disabled** in this profile because loading its PyTorch model is not reliable within the free instance's 512 MB memory. The full `requirements.txt` and Dockerfile remain for a larger host. Render free services sleep after 15 minutes without traffic and may take about a minute to wake.
 
 After Render creates the service, copy its actual `onrender.com` URL into the Python API URL field on `/crypto-analyst.html`. The API hostname is assigned by Render and is not guessed or hard-coded.
 
@@ -43,7 +43,7 @@ The Dockerfile performs the Kronos repository clone and starts the API. Configur
 
 - `GET /health`
 - `GET /dex-candles/{symbol}/{interval}` — DexScreener pool discovery plus GeckoTerminal DEX OHLCV fallback (no API key; public rate limit is approximately 10 requests/minute)
-- `GET /derivatives/{symbol}` — Binance USD-M perpetual funding, open interest, mark/index prices, and recent liquidation-feed sample
+- `GET /derivatives/{symbol}` — independently queries public Binance USD-M, Bybit Linear, and OKX USDT-SWAP market data; returns per-exchange open interest (USD where available/estimated), funding rate, available long/short account ratios, coverage status, and indicative aggregates. Results are briefly cached to reduce upstream rate-limit pressure. Liquidation totals are intentionally not fabricated: a complete live feed requires exchange WebSocket streams and is not represented by these REST snapshots.
 - `GET /marketdata/{symbol}` — Binance 24h quote, top-20 order-book depth/spread/imbalance, and best-match DexScreener pool liquidity
 - `GET /token-risk/{chain_id}/{address}` — GoPlus token-security flags, holder concentration and reported LP lock/burn indicators for supported EVM networks
 
@@ -64,3 +64,8 @@ The Python service is source code only until deployed to a persistent Python hos
 ## Model interpretation
 
 Kronos is a financial-candlestick forecasting model, not a news/research LLM. The P10–P90 band is the percentile range of sampled model paths, not a calibrated 80% real-world confidence interval. Forecasts are experimental and are not financial advice.
+
+
+## Multi-exchange derivatives notes
+
+The derivatives endpoint queries Binance, Bybit and OKX independently. A symbol can exist on one venue but not another; the response reports each venue's status and only aggregates fields actually returned. Open interest is reported in USD when the exchange supplies a USD value, or estimated as contract quantity × mark price where possible. Funding and long/short account ratios are arithmetic averages of the available venue values, not a volume-weighted CoinGlass-style composite. Do not compare raw open-interest contract quantities across venues. Public exchange APIs are rate-limited and can be temporarily unavailable. Liquidations are not shown as totals because complete market-wide feeds require WebSocket subscriptions and exchange-specific event interpretation.
