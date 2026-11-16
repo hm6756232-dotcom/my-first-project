@@ -212,17 +212,15 @@ def derivatives(symbol: str):
         funding = requests.get(base + "/fundingRate", params={"symbol": symbol, "limit": 1}, timeout=10)
         funding.raise_for_status()
         fdata = funding.json()
-        start_ms = int(pd.Timestamp.utcnow().timestamp()*1000)-60*60*1000
-        liquidations = requests.get(base + "/allForceOrders", params={"symbol": symbol, "startTime": start_ms, "limit": 1000}, timeout=10)
-        liquidations.raise_for_status()
-        events = liquidations.json() or []
-        long_usd = sum(float(x.get("price",0))*float(x.get("origQty",0)) for x in events if x.get("side")=="SELL")
-        short_usd = sum(float(x.get("price",0))*float(x.get("origQty",0)) for x in events if x.get("side")=="BUY")
+        # Binance discontinued the public REST allForceOrders endpoint.
+        # The remaining forceOrders REST endpoint is private USER_DATA, so do not
+        # call it anonymously or present its data as public market-wide liquidations.
         return {"available": True, "symbol": symbol, "markPrice": float(p.get("markPrice") or 0),
                 "indexPrice": float(p.get("indexPrice") or 0), "openInterest": float(interest.get("openInterest") or 0),
                 "fundingRate": float(fdata[-1].get("fundingRate")) if fdata else None,
-                "longLiquidationsUsd": long_usd, "shortLiquidationsUsd": short_usd,
-                "note": "Liquidation feed is sampled and may not represent every market liquidation."}
+                "longLiquidationsUsd": None, "shortLiquidationsUsd": None,
+                "liquidationDataAvailable": False,
+                "note": "Mark price, index price, open interest and funding rate are public Futures REST data. Public REST liquidation history is not available through allForceOrders; market-wide liquidation events require the public forceOrder WebSocket stream."}
     except requests.RequestException as e:
         return {"available": False, "symbol": symbol, "error": str(e)[:160],
                 "markPrice": None, "indexPrice": None, "openInterest": None,
