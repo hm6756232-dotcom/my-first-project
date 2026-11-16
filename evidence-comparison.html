@@ -104,17 +104,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
 </section>
 <section class="ec-hero"><div class="ec-orb" aria-hidden="true"><span class="ec-orb-core">SHA<br>256</span><i class="ec-node n1"></i><i class="ec-node n2"></i></div><div class="ec-kicker"><i></i> ORIGINVAULT / FREE LOCAL TOOL</div><h1>Evidence<br><span>Comparison Lab.</span></h1><p>Two files. Two fingerprints. One precise comparison. Check whether digital evidence is byte-for-byte identical — privately, right inside your browser.</p></section>
 
-<section class="ec-panel"
-<section class="ov-walkthrough" id="evidenceWalkthrough" aria-label="Evidence Comparison slideshow">
-  <div class="ov-walk-head"><div><span class="ov-walk-kicker">INTERACTIVE FIELD GUIDE · EVIDENCE COMPARISON</span><h2>Compare two files with <em>a clear, careful workflow.</em></h2></div><span class="ov-walk-count" data-walk-count>01 / 04</span></div>
-  <div class="ov-walk-track" data-walk-track aria-live="polite">
-    <article class="ov-walk-slide is-active"><span class="ov-walk-number">01</span><div><small>CHOOSE YOUR REFERENCE PAIR</small><h3>Select file A and file B</h3><p>Choose the original or reference file as A, then the copy you want to examine as B. Keep the intended reference clear so the report is easy to interpret.</p><div class="ov-walk-tags"><span>REFERENCE FILE A</span><span>COMPARISON FILE B</span></div></div><span class="ov-walk-symbol">A ⇄ B</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">02</span><div><small>CREATE LOCAL FINGERPRINTS</small><h3>Calculate SHA-256 hashes</h3><p>Your browser reads the selected files locally and creates a SHA-256 fingerprint for each. The files are not uploaded to the server for this comparison.</p><div class="ov-walk-tags"><span>SHA-256</span><span>IN-BROWSER PROCESSING</span></div></div><span class="ov-walk-symbol">#</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">03</span><div><small>RUN THE COMPARISON ENGINES</small><h3>Check exact and supporting signals</h3><p>The lab compares file bytes and hashes, then applies relevant supporting checks such as image similarity, perceptual image hash, metadata, text or media structure when the file types allow it.</p><div class="ov-walk-tags"><span>BYTE-LEVEL CHECK</span><span>FILE-TYPE SIGNALS</span></div></div><span class="ov-walk-symbol">⌁</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">04</span><div><small>READ AND PRESERVE THE RESULT</small><h3>Interpret the outcome carefully</h3><p>Matching SHA-256 hashes and bytes indicate identical files. A mismatch can result from editing, metadata changes, compression or re-encoding. Similarity is not proof of authenticity, authorship or AI/human origin. Copy the hashes into your records.</p><div class="ov-walk-tags"><span>COMPARE THE VERDICT</span><span>KEEP BOTH HASHES</span></div></div><span class="ov-walk-symbol">✓</span></article>
-  </div>
-  <div class="ov-walk-controls"><button type="button" data-walk-prev disabled>← PREVIOUS</button><div class="ov-walk-dots" data-walk-dots aria-label="Choose a guide step"></div><button type="button" data-walk-next>NEXT STEP →</button></div>
-</section> aria-label="File comparison tool">
+<section class="ec-panel" aria-label="File comparison tool">
 <div class="ec-panel-head"><strong>01 / SELECT TWO FILES</strong><span class="ec-private">✦ 100% LOCAL · NO UPLOAD</span></div>
 <div class="ec-files">
 <label class="ec-file" id="dropA"><input id="evidenceFileA" type="file"><span class="ec-file-icon">＋</span><h2>FILE A / REFERENCE</h2><p>Drop a file here or browse your device</p><span class="ec-file-meta" id="evidenceNameA">No file selected · Max 100 MB</span></label>
@@ -329,28 +319,5 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
 })();
 </script>
 
-<script>
-(function(){
- document.querySelectorAll('.ov-walkthrough').forEach(function(root){
-  var slides=Array.from(root.querySelectorAll('.ov-walk-slide'));
-  var prev=root.querySelector('[data-walk-prev]'),next=root.querySelector('[data-walk-next]');
-  var dots=root.querySelector('[data-walk-dots]'),count=root.querySelector('[data-walk-count]'),index=0;
-  if(!slides.length||!prev||!next||!dots||!count)return;
-  slides.forEach(function(_,i){
-   var dot=document.createElement('button');dot.type='button';dot.setAttribute('aria-label','Show guide step '+(i+1));
-   dot.addEventListener('click',function(){show(i)});dots.appendChild(dot);
-  });
-  function show(i){
-   index=Math.max(0,Math.min(slides.length-1,i));
-   slides.forEach(function(slide,n){slide.classList.toggle('is-active',n===index);slide.setAttribute('aria-hidden',n===index?'false':'true')});
-   Array.from(dots.children).forEach(function(dot,n){if(n===index)dot.setAttribute('aria-current','step');else dot.removeAttribute('aria-current')});
-   prev.disabled=index===0;next.disabled=index===slides.length-1;
-   count.textContent=String(index+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
-  }
-  prev.addEventListener('click',function(){show(index-1)});
-  next.addEventListener('click',function(){show(index+1)});
-  show(0);
- });
-})();
-</script>
+
 </body></html>
