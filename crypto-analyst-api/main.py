@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from google import genai
@@ -404,3 +404,134 @@ def forecast(req: ForecastRequest):
         raise
     except Exception as e:
         raise HTTPException(502, "Kronos inference failed: " + str(e)[:300])
+
+
+# ---------------- ORIGINVAULT SITE-WIDE AI ASSISTANT ----------------
+# Provider keys are optional and must be configured as server-side environment variables.
+# Supported providers: Gemini, Groq, and OpenRouter. No paid provider is required by this code.
+from collections import defaultdict
+import time as _assistant_time
+
+class AssistantChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=4000)
+    history: list[dict[str, str]] = Field(default_factory=list, max_length=8)
+
+_assistant_requests = defaultdict(list)
+_ASSISTANT_SYSTEM = """You are OriginVault AI Assistant, the helpful guide for the ORIGINVAULT website.
+Be accurate, warm, concise and practical. Respond in the same language as the user (English or Persian).
+You know these sections:
+1) Media Authenticity (/ai.html): examines image/video/audio for AI-generated signals and provenance; C2PA marker presence is not full cryptographic validation.
+2) Token Intelligence (/token-intelligence.html): examines supported EVM token contracts, tokenomics, liquidity, holders and market signals. It is not a guarantee of safety.
+3) Evidence Comparison Lab (/evidence-comparison.html): local browser-based file comparison using SHA-256, byte-level checks and perceptual image similarity; selected files are processed in the browser, not uploaded by this tool.
+4) AI Crypto Analyst (/crypto-analyst.html): technical indicators, market data and experimental scenarios. Heuristic scores and model output are not financial advice.
+5) OriginVault token overview (/token-project.html): official ORIGINVAI project information.
+You may guide users step by step, explain concepts and interpret result text they voluntarily paste. You may direct users to the relevant page using its exact path.
+IMPORTANT LIMITS: You cannot directly operate website tools, inspect a user's private files, change account settings, submit transactions, move funds, execute code, or perform actions on their behalf. Never claim an action was completed. Never request or accept wallet seed phrases, private keys, passwords or recovery codes; tell users not to share them. Do not invent live prices, analysis results, API status or on-chain facts. For crypto, avoid personalized investment recommendations and state uncertainty. Do not claim to have run a scan or comparison unless the user provides its result.
+If asked to do something beyond these abilities, explain the limitation and provide the exact section/link and next steps. Prefer short structured answers over long walls of text."""
+
+def _assistant_local_reply(message: str) -> str:
+    m = message.lower()
+    persian = any(ch in message for ch in "اآبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی")
+    if any(x in m for x in ("which tool", "which section", "کدام ابزار", "کدوم ابزار", "از کجا شروع")):
+        return ("برای بررسی تصویر، ویدئو یا صدا از Media Authenticity استفاده کنید: /ai.html\n"
+                "برای بررسی قرارداد و وضعیت توکن: /token-intelligence.html\n"
+                "برای مقایسه دو فایل: /evidence-comparison.html\n"
+                "برای اندیکاتورها و سناریوهای بازار: /crypto-analyst.html\n"
+                "برای اطلاعات پروژه ORIGINVAI: /token-project.html")
+    if any(x in m for x in ("compare", "file", "sha-256", "مقایسه", "فایل")):
+        return ("برای مقایسه دو فایل وارد Evidence Comparison Lab شوید: /evidence-comparison.html\n"
+                "دو فایل را انتخاب کنید؛ بررسی SHA-256 و مقایسه بایت‌به‌بایت در مرورگر انجام می‌شود. فایل‌ها از طریق این دستیار آپلود نمی‌شوند.")
+    if any(x in m for x in ("token", "contract", "توکن", "قرارداد", "liquidity", "نقدینگی")):
+        return ("برای بررسی توکن از Token Intelligence استفاده کنید: /token-intelligence.html\n"
+                "شبکه و آدرس قرارداد را با دقت انتخاب کنید. داده‌های نقدینگی و پرچم‌های امنیت قرارداد شاخص‌های متفاوتی هستند و هیچ‌کدام تضمین ایمنی نیستند.")
+    if any(x in m for x in ("crypto", "rsi", "macd", "market", "ارز", "تحلیل", "اندیکاتور")):
+        return ("برای تحلیل تکنیکال وارد AI Crypto Analyst شوید: /crypto-analyst.html\n"
+                "می‌توانید نماد، تایم‌فریم و اندیکاتورها را انتخاب کنید. خروجی‌ها و امتیازها مبتنی بر داده و قواعد تحلیلی‌اند، قطعی نیستند و توصیه مالی محسوب نمی‌شوند.")
+    if any(x in m for x in ("image", "video", "audio", "c2pa", "رسانه", "تصویر", "ویدئو", "صدا")):
+        return ("برای بررسی تصویر، ویدئو یا صدا وارد Media Authenticity شوید: /ai.html\n"
+                "وجود C2PA فقط نشانگر وجود متادیتا/نشانگر است و به‌تنهایی اعتبار رمزنگاری‌شده محتوا را اثبات نمی‌کند.")
+    if persian:
+        return ("من راهنمای ORIGINVAULT هستم. می‌توانم درباره بخش‌های سایت، مراحل استفاده و مفهوم نتایج راهنمایی بدهم.\n"
+                "سؤال‌تان را کمی مشخص‌تر بپرسید یا نتیجه‌ای را که می‌خواهید توضیح بدهم اینجا قرار دهید. لطفاً رمز عبور، کلید خصوصی یا عبارت بازیابی کیف پول را ارسال نکنید.")
+    return ("I'm your OriginVault site guide. I can explain the site's systems, walk you through a workflow, or help interpret result text you share. "
+            "Tell me which section or task you have in mind. Never share passwords, private keys or wallet recovery phrases.")
+
+@app.get("/assistant/health")
+def assistant_health():
+    providers = []
+    if os.getenv("GEMINI_API_KEY"): providers.append("Gemini")
+    if os.getenv("GROQ_API_KEY"): providers.append("Groq")
+    if os.getenv("OPENROUTER_API_KEY"): providers.append("OpenRouter")
+    return {"ok": True, "service": "originvault-assistant", "providers": providers, "mode": "ai" if providers else "site-guide"}
+
+def _assistant_openai_compatible(base_url: str, key: str, model: str, messages: list[dict], extra_headers: dict | None = None):
+    headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
+    if extra_headers: headers.update(extra_headers)
+    response = requests.post(base_url, headers=headers,
+        json={"model": model, "messages": messages, "temperature": 0.45, "max_tokens": 850},
+        timeout=35)
+    response.raise_for_status()
+    data = response.json()
+    return data["choices"][0]["message"]["content"]
+
+def _assistant_gemini(messages: list[dict]) -> str:
+    key = os.getenv("GEMINI_API_KEY")
+    model = os.getenv("ASSISTANT_GEMINI_MODEL", "gemini-2.5-flash")
+    contents = []
+    for item in messages[1:]:
+        role = "model" if item["role"] == "assistant" else "user"
+        contents.append({"role": role, "parts": [{"text": item["content"]}]})
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    response = requests.post(url, params={"key": key}, json={
+        "systemInstruction": {"parts": [{"text": _ASSISTANT_SYSTEM}]},
+        "contents": contents,
+        "generationConfig": {"temperature": 0.45, "maxOutputTokens": 850}
+    }, timeout=35)
+    response.raise_for_status()
+    data = response.json()
+    return "".join(x.get("text", "") for x in data["candidates"][0]["content"]["parts"]).strip()
+
+@app.post("/assistant/chat")
+def assistant_chat(req: AssistantChatRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    now = _assistant_time.time()
+    recent = [t for t in _assistant_requests[client_ip] if now - t < 60]
+    if len(recent) >= 12:
+        raise HTTPException(429, "Please wait a moment before sending another message.")
+    recent.append(now)
+    _assistant_requests[client_ip] = recent
+
+    safe_history = []
+    for item in req.history[-8:]:
+        role = item.get("role")
+        content = str(item.get("content", ""))[:4000]
+        if role in ("user", "assistant") and content.strip():
+            safe_history.append({"role": role, "content": content})
+    if not safe_history or safe_history[-1]["role"] != "user" or safe_history[-1]["content"] != req.message:
+        safe_history.append({"role": "user", "content": req.message})
+    messages = [{"role": "system", "content": _ASSISTANT_SYSTEM}] + safe_history
+
+    providers = []
+    if os.getenv("GEMINI_API_KEY"): providers.append(("Gemini", lambda: _assistant_gemini(messages)))
+    if os.getenv("GROQ_API_KEY"):
+        providers.append(("Groq", lambda: _assistant_openai_compatible(
+            "https://api.groq.com/openai/v1/chat/completions", os.getenv("GROQ_API_KEY"),
+            os.getenv("GROQ_ASSISTANT_MODEL", "llama-3.3-70b-versatile"), messages)))
+    if os.getenv("OPENROUTER_API_KEY"):
+        providers.append(("OpenRouter", lambda: _assistant_openai_compatible(
+            "https://openrouter.ai/api/v1/chat/completions", os.getenv("OPENROUTER_API_KEY"),
+            os.getenv("OPENROUTER_ASSISTANT_MODEL", "meta-llama/llama-3.3-70b-instruct:free"), messages,
+            {"HTTP-Referer": "https://originvault.onrender.com", "X-Title": "ORIGINVAULT AI Assistant"})))
+    if not providers:
+        return {"reply": _assistant_local_reply(req.message), "provider": "Site Guide",
+                "mode": "guide", "note": "No external AI provider is configured on the server."}
+    failures = []
+    for name, call in providers:
+        try:
+            answer = call()
+            if answer:
+                return {"reply": answer[:7000], "provider": name, "mode": "ai"}
+            failures.append(name + ": empty response")
+        except Exception as exc:
+            failures.append(name + ": " + str(exc)[:160])
+    raise HTTPException(502, "Configured AI providers are temporarily unavailable. " + " | ".join(failures))
