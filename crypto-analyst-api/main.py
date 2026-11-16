@@ -266,7 +266,7 @@ def _okx_derivatives(symbol: str):
     root = "https://www.okx.com/api/v5/public"
     out = {"exchange":"OKX SWAP","status":"unavailable","openInterestUsd":None,"fundingRate":None,
            "longRatio":None,"shortRatio":None,"markPrice":None,"indexPrice":None,"timestamp":None,"error":None}
-    base = symbol[:-4] if symbol.endswith("USDT") else symbol[:-3] if symbol.endswith("USD") else symbol
+    base = symbol[:-4] if symbol.endswith(("USDT","USDC","BUSD")) else symbol[:-3] if symbol.endswith("USD") else symbol
     inst = base + "-USDT-SWAP"
     try:
         oi = _get_json(root + "/open-interest", {"instType":"SWAP","instId":inst})
