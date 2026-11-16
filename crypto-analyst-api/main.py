@@ -196,11 +196,28 @@ def marketdata(symbol: str):
         "depthLevels": 20, "note": "Order-book depth is a snapshot and can change rapidly."
     }
 
+# Successful Futures snapshots are cached briefly to avoid repeated upstream calls.
+_derivatives_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+_derivatives_cooldown: dict[str, float] = {}
+
 @app.get("/derivatives/{symbol}")
 def derivatives(symbol: str):
+    import time
+    from email.utils import parsedate_to_datetime
     symbol = symbol.upper()
     if not symbol.isalnum() or len(symbol) > 20:
         raise HTTPException(400, "Invalid derivatives symbol")
+    now = time.time()
+    cached = _derivatives_cache.get(symbol)
+    if cached and now - cached[0] < 30:
+        return {**cached[1], "cached": True}
+    blocked_until = _derivatives_cooldown.get(symbol, 0)
+    if now < blocked_until:
+        return {"available": False, "symbol": symbol, "rateLimited": True,
+                "retryAfterSeconds": max(1, int(blocked_until-now)),
+                "error": "Binance rate limit cooldown is active; wait before retrying.",
+                "markPrice": None, "indexPrice": None, "openInterest": None,
+                "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
     base = "https://fapi.binance.com/fapi/v1"
     try:
         premium = requests.get(base + "/premiumIndex", params={"symbol": symbol}, timeout=10)
@@ -212,16 +229,30 @@ def derivatives(symbol: str):
         funding = requests.get(base + "/fundingRate", params={"symbol": symbol, "limit": 1}, timeout=10)
         funding.raise_for_status()
         fdata = funding.json()
-        # Binance discontinued the public REST allForceOrders endpoint.
-        # The remaining forceOrders REST endpoint is private USER_DATA, so do not
-        # call it anonymously or present its data as public market-wide liquidations.
-        return {"available": True, "symbol": symbol, "markPrice": float(p.get("markPrice") or 0),
-                "indexPrice": float(p.get("indexPrice") or 0), "openInterest": float(interest.get("openInterest") or 0),
-                "fundingRate": float(fdata[-1].get("fundingRate")) if fdata else None,
-                "longLiquidationsUsd": None, "shortLiquidationsUsd": None,
-                "liquidationDataAvailable": False,
-                "note": "Mark price, index price, open interest and funding rate are public Futures REST data. Public REST liquidation history is not available through allForceOrders; market-wide liquidation events require the public forceOrder WebSocket stream."}
+        # Public REST liquidation history is not available via allForceOrders.
+        result = {"available": True, "symbol": symbol, "markPrice": float(p.get("markPrice") or 0),
+                  "indexPrice": float(p.get("indexPrice") or 0), "openInterest": float(interest.get("openInterest") or 0),
+                  "fundingRate": float(fdata[-1].get("fundingRate")) if fdata else None,
+                  "longLiquidationsUsd": None, "shortLiquidationsUsd": None,
+                  "liquidationDataAvailable": False,
+                  "note": "Mark price, index price, open interest and funding rate are public Futures REST data. Public REST liquidation history requires the public forceOrder WebSocket stream."}
+        _derivatives_cache[symbol] = (time.time(), result)
+        _derivatives_cooldown.pop(symbol, None)
+        return result
     except requests.RequestException as e:
+        response = getattr(e, "response", None)
+        if response is not None and response.status_code == 429:
+            retry = response.headers.get("Retry-After", "60")
+            try:
+                wait_seconds = max(30, min(900, int(float(retry))))
+            except (TypeError, ValueError):
+                wait_seconds = 60
+            _derivatives_cooldown[symbol] = time.time() + wait_seconds
+            return {"available": False, "symbol": symbol, "rateLimited": True,
+                    "retryAfterSeconds": wait_seconds,
+                    "error": "Binance returned HTTP 429. Requests are paused to respect its rate limit.",
+                    "markPrice": None, "indexPrice": None, "openInterest": None,
+                    "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
         return {"available": False, "symbol": symbol, "error": str(e)[:160],
                 "markPrice": None, "indexPrice": None, "openInterest": None,
                 "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
