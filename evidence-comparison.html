@@ -103,6 +103,25 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
 </div>
 <div class="ec-actions"><button class="ec-run" id="evidenceCompare" type="button" disabled>RUN EXACT COMPARISON ↗</button><button class="ec-clear" id="evidenceClear" type="button">RESET</button></div><div class="ec-status" id="evidenceStatus" role="status" aria-live="polite">Select two files to begin · Files stay on this device.</div>
 <div class="ec-result" id="evidenceResult" aria-live="polite"><div class="ec-verdict" id="evidenceVerdict"></div><div class="ec-explain" id="evidenceExplain"></div><div class="ec-hashes"><div class="ec-hash"><small>FILE A · SHA-256</small><code id="evidenceHashA"></code><button type="button" data-copy-evidence="a">COPY FINGERPRINT ↗</button></div><div class="ec-hash"><small>FILE B · SHA-256</small><code id="evidenceHashB"></code><button type="button" data-copy-evidence="b">COPY FINGERPRINT ↗</button></div></div><div class="ec-note" id="evidenceDetails"></div></div>
+
+<div class="ec-engine-dashboard" id="ecEngineDashboard" aria-live="polite">
+ <div class="ec-engine-heading"><div><span class="ec-guide-kicker">02 / MULTI-ENGINE ANALYSIS</span><h2>Independent comparison engines</h2><p>Each engine reports its own finding. Unsupported formats are marked clearly — no synthetic overall score.</p></div><span class="ec-private">LOCAL PROCESSING</span></div>
+ <div class="ec-engine-grid">
+  <article class="ec-engine-card" data-engine="hash"><span class="ec-engine-number">ENGINE 01</span><h3>SHA-256 fingerprint</h3><p>Cryptographic file fingerprints.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">Fingerprint values appear above.</small></article>
+  <article class="ec-engine-card" data-engine="bytes"><span class="ec-engine-number">ENGINE 02</span><h3>Exact byte comparison</h3><p>Direct comparison of file bytes.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">Checks exact equality, not visual similarity.</small></article>
+  <article class="ec-engine-card" data-engine="metadata"><span class="ec-engine-number">ENGINE 03</span><h3>File metadata</h3><p>Name, size, MIME type and modified date.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail"></small></article>
+  <article class="ec-engine-card" data-engine="image"><span class="ec-engine-number">ENGINE 04</span><h3>Image visual similarity</h3><p>Compares normalized image samples in-browser.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">A heuristic visual estimate, not an authenticity test.</small></article>
+  <article class="ec-engine-card" data-engine="text"><span class="ec-engine-number">ENGINE 05</span><h3>Text content comparison</h3><p>Compares decoded text and changed lines.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">For supported plain-text formats.</small></article>
+  <article class="ec-engine-card" data-engine="media"><span class="ec-engine-number">ENGINE 06</span><h3>Media structure</h3><p>Reads browser-exposed image/audio/video properties.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">Container-level properties only; no media fingerprint.</small></article>
+ </div>
+ <p class="ec-engine-footnote"><strong>How to read this:</strong> SHA-256 and byte comparison are two views of exact integrity, not two independent votes. Image similarity is a simple normalized pixel-sample estimate and may change with resizing, color profiles or encoding. Text comparison supports common plain-text files; PDF text extraction is not included in this version. Media structure does not prove that two recordings contain the same perceptual content.</p>
+</div>
+<style>
+.ec-engine-dashboard{margin-top:26px;padding:clamp(20px,3vw,30px);border:1px solid #314363;border-radius:18px;background:linear-gradient(145deg,#111d32ed,#0d1628f2);box-shadow:0 24px 70px #0005}
+.ec-engine-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}.ec-engine-heading h2{font-size:clamp(21px,3vw,30px);letter-spacing:-.04em;margin:9px 0;color:#eef3ff}.ec-engine-heading p{font-size:11px;color:#98aac6;line-height:1.8;margin:0;max-width:570px}
+.ec-engine-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.ec-engine-card{min-width:0;padding:16px;border:1px solid #293c5a;border-radius:12px;background:linear-gradient(145deg,#172640aa,#101a2b);transition:border-color .2s,transform .2s}.ec-engine-card:hover{transform:translateY(-2px);border-color:#718ed0}.ec-engine-number{font:9px 'DM Mono',monospace;letter-spacing:.12em;color:#8eacff}.ec-engine-card h3{font-size:13px;margin:10px 0 6px;color:#eaf0ff}.ec-engine-card p{font-size:10px;line-height:1.65;color:#92a4c0;min-height:32px;margin:0 0 12px}.ec-engine-state{display:block;font:10px 'DM Mono',monospace;color:#8be5dc}.ec-engine-detail{display:block;margin-top:7px;color:#8396b3;font-size:9px;line-height:1.65;overflow-wrap:anywhere}.ec-engine-card[data-status="pass"]{border-color:#367b70}.ec-engine-card[data-status="warn"]{border-color:#826a43}.ec-engine-card[data-status="skip"]{opacity:.78}.ec-engine-footnote{margin:15px 0 0;padding:13px 15px;border-left:2px solid #8eacff;background:#0b1729;color:#91a3bf;font-size:9px;line-height:1.85}.ec-engine-footnote strong{color:#c5d5f1}
+@media(max-width:760px){.ec-engine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ec-engine-heading{flex-direction:column}}@media(max-width:480px){.ec-engine-grid{grid-template-columns:1fr}}
+</style>
 </section>
 <section class="ec-steps"><article class="ec-step"><b>01 / FINGERPRINT</b><h3>SHA-256 hashing</h3><p>Generate a cryptographic fingerprint for each selected file in your browser.</p></article><article class="ec-step"><b>02 / VERIFY</b><h3>Byte-level comparison</h3><p>Compare the actual file bytes, not just names, sizes or visible previews.</p></article><article class="ec-step"><b>03 / REPORT</b><h3>Clear result</h3><p>See both fingerprints and whether exact equality was confirmed.</p></article></section>
 <div class="ec-note"><strong>Important limitations:</strong> Matching files are byte-for-byte identical, but a different result does not necessarily mean their visible or audible content differs. Metadata, compression or re-encoding can change file bytes. This tool does not prove authorship, authenticity, AI origin or what a file depicts. Each file must be 100 MB or smaller.</div>
@@ -127,4 +146,52 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
  result.querySelectorAll("[data-copy-evidence]").forEach(btn=>btn.addEventListener("click",async()=>{const v=hashes[btn.dataset.copyEvidence];if(!v)return;try{await navigator.clipboard.writeText(v);status.textContent="Fingerprint copied to clipboard."}catch{status.textContent="Clipboard access is unavailable in this browser."}}));
 })();
 </script>
+
+<script>
+(function(){
+ const $=id=>document.getElementById(id),a=$("evidenceFileA"),b=$("evidenceFileB"),run=$("evidenceCompare");
+ const cards={};document.querySelectorAll("[data-engine]").forEach(c=>cards[c.dataset.engine]=c);
+ const set=(key,state,detail)=>{const c=cards[key];if(!c)return;c.dataset.status=state;c.querySelector(".ec-engine-state").textContent=state==="pass"?"CHECK COMPLETE":state==="warn"?"DIFFERENCE / REVIEW":state==="skip"?"NOT SUPPORTED":"ANALYSIS ERROR";c.querySelector(".ec-engine-detail").textContent=detail};
+ const size=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(2)+" MB";
+ const ext=f=>(f.name.split(".").pop()||"").toLowerCase();
+ const textExt=new Set(["txt","md","csv","json","xml","html","htm","js","css","log","yaml","yml","tsv","svg"]);
+ function imageInfo(file){return createImageBitmap(file).then(bitmap=>({width:bitmap.width,height:bitmap.height,bitmap}));}
+ async function imageSimilarity(x,y){
+  const [ix,iy]=await Promise.all([imageInfo(x),imageInfo(y)]),w=64,h=64;
+  function sample(info){const c=document.createElement("canvas");c.width=w;c.height=h;const ctx=c.getContext("2d",{willReadFrequently:true});ctx.drawImage(info.bitmap,0,0,w,h);info.bitmap.close();return ctx.getImageData(0,0,w,h).data}
+  const p=sample(ix),q=sample(iy);let diff=0,n=0;for(let i=0;i<p.length;i+=4){for(let k=0;k<3;k++){diff+=Math.abs(p[i+k]-q[i+k])/255;n++}}
+  return {score:Math.max(0,100*(1-diff/n)),a:ix.width+"×"+ix.height,b:iy.width+"×"+iy.height};
+ }
+ async function textCompare(x,y){
+  const [sx,sy]=await Promise.all([x.text(),y.text()]);if(sx.includes("\u0000")||sy.includes("\u0000"))throw new Error("Binary-looking content");
+  const la=sx.replace(/\r\n/g,"\n").split("\n"),lb=sy.replace(/\r\n/g,"\n").split("\n"),n=Math.max(la.length,lb.length);let changed=0,added=0,removed=0;
+  for(let i=0;i<n;i++){if(la[i]===lb[i])continue;changed++;if(la[i]===undefined)added++;else if(lb[i]===undefined)removed++}
+  return {same:sx===sy,linesA:la.length,linesB:lb.length,changed,added,removed};
+ }
+ function mediaInfo(file){
+  const type=file.type||"";
+  if(type.startsWith("image/"))return imageInfo(file).then(v=>{v.bitmap.close();return "Image dimensions: "+v.width+"×"+v.height});
+  if(type.startsWith("audio/")||type.startsWith("video/"))return new Promise((resolve,reject)=>{
+   const el=document.createElement(type.startsWith("audio/")?"audio":"video"),url=URL.createObjectURL(file),timer=setTimeout(()=>finish(new Error("Metadata read timed out")),8000);
+   function finish(err){clearTimeout(timer);URL.revokeObjectURL(url);el.removeAttribute("src);try{el.load()}catch{};err?reject(err):resolve("Duration: "+(Number.isFinite(el.duration)?el.duration.toFixed(2)+" seconds":"not exposed")+" · Media type: "+type)}
+   el.preload="metadata";el.onloadedmetadata=()=>finish();el.onerror=()=>finish(new Error("Browser could not read media metadata"));el.src=url;
+  });
+  return Promise.reject(new Error("No supported browser media metadata for this format"));
+ }
+ run.addEventListener("click",async()=>{
+  const x=a.files&&a.files[0],y=b.files&&b.files[0];if(!x||!y)return;
+  Object.keys(cards).forEach(k=>set(k,"pending","Working locally in this browser…"));
+  set("hash","pass","SHA-256 fingerprints are shown in the exact-comparison result above; this is the fingerprint view of exact integrity.");
+  set("bytes","pass","The exact-byte result is shown above; SHA-256 and byte comparison are related integrity checks, not independent votes.");
+  const metaA=[x.name,size(x.size),x.type||"MIME type unavailable",x.lastModified?new Date(x.lastModified).toISOString():"modified date unavailable"].join(" · ");
+  const metaB=[y.name,size(y.size),y.type||"MIME type unavailable",y.lastModified?new Date(y.lastModified).toISOString():"modified date unavailable"].join(" · ");
+  set("metadata",metaA===metaB?"pass":"warn","A: "+metaA+" | B: "+metaB+" · Metadata equality does not prove content equality.");
+  const imageTypes=["image/png","image/jpeg","image/webp","image/gif","image/bmp"];
+  if(imageTypes.includes(x.type)&&imageTypes.includes(y.type)){try{const v=await imageSimilarity(x,y);set("image",v.score>=99.99?"pass":"warn","Normalized 64×64 RGB sample similarity: "+v.score.toFixed(2)+"% · A "+v.a+" / B "+v.b+". This is a heuristic, not a perceptual hash or authenticity verdict.")}catch(e){set("image","skip","Image decoding unavailable: "+e.message)}}else set("image","skip","Select two supported raster images (PNG, JPEG, WebP, GIF or BMP).");
+  if(textExt.has(ext(x))&&textExt.has(ext(y))&&x.size<=5*1024*1024&&y.size<=5*1024*1024){try{const v=await textCompare(x,y);set("text",v.same?"pass":"warn",v.same?"Decoded text is identical ("+v.linesA+" lines).":"Changed line positions: "+v.changed+" · added-side lines: "+v.added+" · removed-side lines: "+v.removed+" · A "+v.linesA+" lines / B "+v.linesB+" lines. Line counts are positional, not a semantic diff.")}catch(e){set("text","skip","Could not safely decode both files as supported text: "+e.message)}}else set("text","skip","Choose two supported plain-text files up to 5 MB each. PDF extraction is not included.");
+  const mediaTypes=["image/","audio/","video/"];if(mediaTypes.some(t=>(x.type||"").startsWith(t))&&mediaTypes.some(t=>(y.type||"").startsWith(t))){try{const [u,v]=await Promise.all([mediaInfo(x),mediaInfo(y)]);set("media",u===v?"pass":"warn","A: "+u+" · B: "+v+" · These are browser-exposed structural properties only.")}catch(e){set("media","skip",e.message)}}else set("media","skip","No supported image, audio or video metadata pair was detected.");
+ },{once:false});
+})();
+</script>
+
 </body></html>
