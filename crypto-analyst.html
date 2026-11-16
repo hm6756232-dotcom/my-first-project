@@ -82,6 +82,9 @@ function draw(){if(!candles.length)return;let cv=$('chart'),rect=cv.getBoundingC
  if(marketExtras.imbalance!=null)add('Order book',marketExtras.imbalance>.1?7.5:marketExtras.imbalance<-.2?3.5:5.5,.5);
  if(marketExtras.dexLiquidityUsd!=null)add('DEX liquidity',marketExtras.dexLiquidityUsd>1000000?8:marketExtras.dexLiquidityUsd>250000?6:marketExtras.dexLiquidityUsd>50000?4:2,.7);
  if(marketExtras.fundingRate!=null){const f=Math.abs(Number(marketExtras.fundingRate));add('Funding',f<.0003?8:f<.0008?6:3,.5)}
+ if(marketExtras.longRatio!=null){const lr=Number(marketExtras.longRatio);add('Long/short balance',lr>=.45&&lr<=.55?8:lr>.65?2.5:lr>.58?4:lr<.35?3:6,.6)}
+ if(marketExtras.openInterestUsd!=null&&q?.market_cap>0){const oi=Number(marketExtras.openInterestUsd)/q.market_cap;add('Open interest / market cap',oi<.01?6:oi<.05?7:oi<.12?5:2,.5)}
+ if(marketExtras.volume24h>0&&(marketExtras.bidDepthUsd+marketExtras.askDepthUsd)>0){const depth=(marketExtras.bidDepthUsd+marketExtras.askDepthUsd)/marketExtras.volume24h;add('Order-book depth',depth>.001&&depth<.05?8:depth>=.05&&depth<.15?6:depth>0?4:2,.5)}
  const score=weight?Math.max(1,Math.min(10,total/weight)):null;
  $('valueScore').textContent=score===null?'—':score.toFixed(1);$('valueRing').style.setProperty('--score',score===null?5:score);
  $('valueRating').textContent=score===null?'INSUFFICIENT DATA':score>=8?'ATTRACTIVE SETUP':score>=6.5?'MODERATELY ATTRACTIVE':score>=4.5?'NEUTRAL / WAIT':score>=3?'WEAK VALUE':'UNATTRACTIVE HERE';
