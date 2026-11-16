@@ -250,7 +250,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   if(key==="metadata"){const aa=[x.name,x.size,x.type||"",x.lastModified],bb=[y.name,y.size,y.type||"",y.lastModified];return aa.reduce((n,v,i)=>n+(v===bb[i]?1:0),0)/4*100}
   if(key==="image"){const m=d.match(/([0-9]+(?:\.[0-9]+)?)%/);return m?Number(m[1]):null}
   if(key==="text"){if(d.includes("Decoded text is identical"))return 100;const m=d.match(/Changed line positions: (\d+).*?A (\d+) lines \/ B (\d+) lines/);if(m)return Math.max(0,100-Number(m[1])/Math.max(1,Number(m[2]),Number(m[3]))*100);return null}
-  if(key==="media")return st==="pass"?100:st==="warn"?0:null;
+  if(key==="media"){if((x.type||"").startsWith("image/")&&(y.type||"").startsWith("image/"))return null;return st==="pass"?100:st==="warn"?0:null;}
   return null
  }
  function ratingLabel(v){return v===null?"N/A":v.toFixed(1)+"%"}
@@ -271,7 +271,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   $("ecReportPair").innerHTML=names.map(([label,f])=>'<div class="ec-report-file"><small>'+label+'</small><strong>'+esc(f.name)+'</strong><span>'+esc(f.type||"MIME type unavailable")+' · '+esc((f.size/1024/1024).toFixed(3))+' MB · '+esc(f.lastModified?new Date(f.lastModified).toLocaleString():"Modified date unavailable")+'</span></div>').join("");
   const specs=[["hash","SHA-256 fingerprint"],["bytes","Exact byte comparison"],["metadata","File metadata"],["image","Image visual similarity"],["text","Text content"],["media","Media structure"]];
   const rendered=specs.map(([k,t])=>renderEngine(k,t,x,y));$("ecReportEngines").innerHTML=rendered.map(o=>o.html).join("");
-  const exact=rendered[0].v,applicable=rendered.map(o=>o.v).filter(v=>v!==null),overall=applicable.length?applicable.reduce((s,v)=>s+v,0)/applicable.length:null;
+  const exact=rendered[0].v,applicable=[rendered[0].v,...rendered.slice(2).map(o=>o.v)].filter(v=>v!==null),overall=applicable.length?applicable.reduce((s,v)=>s+v,0)/applicable.length:null;
   $("ecReportScore").textContent=overall===null?"—":Math.round(overall);
   $("ecReportScoreRing").style.setProperty("--score-angle",(overall||0)*3.6+"deg");
   const identical=exact===100;
