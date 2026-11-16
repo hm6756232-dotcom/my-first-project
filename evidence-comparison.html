@@ -113,8 +113,9 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   <article class="ec-engine-card" data-engine="image"><span class="ec-engine-number">ENGINE 04</span><h3>Image visual similarity</h3><p>Compares normalized image samples in-browser.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">A heuristic visual estimate, not an authenticity test.</small></article>
   <article class="ec-engine-card" data-engine="text"><span class="ec-engine-number">ENGINE 05</span><h3>Text content comparison</h3><p>Compares decoded text and changed lines.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">For supported plain-text formats.</small></article>
   <article class="ec-engine-card" data-engine="media"><span class="ec-engine-number">ENGINE 06</span><h3>Media structure</h3><p>Reads browser-exposed image/audio/video properties.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">Container-level properties only; no media fingerprint.</small></article>
+  <article class="ec-engine-card" data-engine="perceptual"><span class="ec-engine-number">ENGINE 07 · SUPPLEMENTAL</span><h3>Perceptual image hash</h3><p>Compares compact grayscale difference fingerprints.</p><strong class="ec-engine-state">Waiting for files</strong><small class="ec-engine-detail">Can tolerate some resizing and recompression; crops and edits can change the hash.</small></article>
  </div>
- <p class="ec-engine-footnote"><strong>How to read this:</strong> SHA-256 and byte comparison are two views of exact integrity, not two independent votes. Image similarity is a simple normalized pixel-sample estimate and may change with resizing, color profiles or encoding. Text comparison supports common plain-text files; PDF text extraction is not included in this version. Media structure does not prove that two recordings contain the same perceptual content.</p>
+ <p class="ec-engine-footnote"><strong>How to read this:</strong> SHA-256 and byte comparison are two views of exact integrity, not two independent votes. Image similarity is a normalized pixel-sample estimate. The supplemental perceptual hash can tolerate some resizing and recompression, but neither proves identity. Text comparison supports common plain-text files; PDF text extraction is not included in this version. Media structure does not prove that two recordings contain the same perceptual content.</p>
 </div>
 <style>
 .ec-engine-dashboard{margin-top:26px;padding:clamp(20px,3vw,30px);border:1px solid #314363;border-radius:18px;background:linear-gradient(145deg,#111d32ed,#0d1628f2);box-shadow:0 24px 70px #0005}
@@ -162,6 +163,28 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   const p=sample(ix),q=sample(iy);let diff=0,n=0;for(let i=0;i<p.length;i+=4){for(let k=0;k<3;k++){diff+=Math.abs(p[i+k]-q[i+k])/255;n++}}
   return {score:Math.max(0,100*(1-diff/n)),a:ix.width+"×"+ix.height,b:iy.width+"×"+iy.height};
  }
+ async function perceptualHash(file){
+  const bitmap=await createImageBitmap(file),w=9,h=8,canvas=document.createElement("canvas");
+  canvas.width=w;canvas.height=h;
+  try{
+   const ctx=canvas.getContext("2d",{willReadFrequently:true});
+   if(!ctx)throw new Error("Canvas pixel access is unavailable");
+   ctx.drawImage(bitmap,0,0,w,h);
+   const px=ctx.getImageData(0,0,w,h).data,bits=[];
+   for(let row=0;row<h;row++)for(let col=0;col<8;col++){
+    const left=(row*w+col)*4,right=(row*w+col+1)*4;
+    const gl=.299*px[left]+.587*px[left+1]+.114*px[left+2];
+    const gr=.299*px[right]+.587*px[right+1]+.114*px[right+2];
+    bits.push(gl>gr?1:0);
+   }
+   return bits.join("");
+  }finally{bitmap.close()}
+ }
+ async function perceptualSimilarity(x,y){
+  const [ha,hb]=await Promise.all([perceptualHash(x),perceptualHash(y)]);
+  let distance=0;for(let i=0;i<ha.length;i++)if(ha[i]!==hb[i])distance++;
+  return {score:(64-distance)/64*100,distance};
+ }
  async function textCompare(x,y){
   const [sx,sy]=await Promise.all([x.text(),y.text()]);if(sx.includes("\u0000")||sy.includes("\u0000"))throw new Error("Binary-looking content");
   const la=sx.replace(/\r\n/g,"\n").split("\n"),lb=sy.replace(/\r\n/g,"\n").split("\n"),n=Math.max(la.length,lb.length);let changed=0,added=0,removed=0;
@@ -189,6 +212,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   const imageTypes=["image/png","image/jpeg","image/webp","image/gif","image/bmp"];
   if(imageTypes.includes(x.type)&&imageTypes.includes(y.type)){try{const v=await imageSimilarity(x,y);set("image",v.score>=99.99?"pass":"warn","Normalized 64×64 RGB sample similarity: "+v.score.toFixed(2)+"% · A "+v.a+" / B "+v.b+". This is a heuristic, not a perceptual hash or authenticity verdict.")}catch(e){set("image","skip","Image decoding unavailable: "+e.message)}}else set("image","skip","Select two supported raster images (PNG, JPEG, WebP, GIF or BMP).");
   if(textExt.has(ext(x))&&textExt.has(ext(y))&&x.size<=5*1024*1024&&y.size<=5*1024*1024){try{const v=await textCompare(x,y);set("text",v.same?"pass":"warn",v.same?"Decoded text is identical ("+v.linesA+" lines).":"Changed line positions: "+v.changed+" · added-side lines: "+v.added+" · removed-side lines: "+v.removed+" · A "+v.linesA+" lines / B "+v.linesB+" lines. Line counts are positional, not a semantic diff.")}catch(e){set("text","skip","Could not safely decode both files as supported text: "+e.message)}}else set("text","skip","Choose two supported plain-text files up to 5 MB each. PDF extraction is not included.");
+  if(imageTypes.includes(x.type)&&imageTypes.includes(y.type)){try{const v=await perceptualSimilarity(x,y);set("perceptual","pass","Difference hash similarity: "+v.score.toFixed(1)+"% · Hamming distance: "+v.distance+"/64. Supplemental image fingerprint; not included in the overall score because it overlaps with visual similarity.")}catch(e){set("perceptual","skip","Perceptual hash unavailable: "+e.message)}}else set("perceptual","skip","Select two supported raster images (PNG, JPEG, WebP, GIF or BMP).");
   const mediaTypes=["image/","audio/","video/"];if(mediaTypes.some(t=>(x.type||"").startsWith(t))&&mediaTypes.some(t=>(y.type||"").startsWith(t))){try{const [u,v]=await Promise.all([mediaInfo(x),mediaInfo(y)]);set("media",u===v?"pass":"warn","A: "+u+" · B: "+v+" · These are browser-exposed structural properties only.")}catch(e){set("media","skip",e.message)}}else set("media","skip","No supported image, audio or video metadata pair was detected.");
  },{once:false});
 })();
@@ -221,7 +245,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
  <div class="ec-report-window">
   <div class="ec-report-top"><span class="ec-report-brand">ORIGINVAULT / FORENSIC ANALYSIS REPORT</span><button class="ec-report-close" id="ecReportClose" type="button" aria-label="Close report">×</button></div>
   <div class="ec-report-body">
-   <div class="ec-guide-kicker">COMPARISON COMPLETE · LOCAL ANALYSIS</div><h2 class="ec-report-title" id="ecReportTitle">Detailed comparison report</h2><p class="ec-report-sub">Results from the six analysis engines. Scores describe technical similarity only, not authenticity, ownership or trustworthiness.</p>
+   <div class="ec-guide-kicker">COMPARISON COMPLETE · LOCAL ANALYSIS</div><h2 class="ec-report-title" id="ecReportTitle">Detailed comparison report</h2><p class="ec-report-sub">Results from seven analysis engines, including a supplemental perceptual image fingerprint. Scores describe technical similarity only, not authenticity, ownership or trustworthiness.</p>
    <div class="ec-report-scorebar"><div class="ec-report-score" id="ecReportScoreRing" style="--score-angle:0deg"><div class="ec-report-score-inner"><b id="ecReportScore">—</b><small>COMPATIBILITY</small></div></div><div><div class="ec-report-verdict" id="ecReportVerdict"></div><div class="ec-report-explain" id="ecReportSummary"></div></div></div>
    <div class="ec-report-pair" id="ecReportPair"></div>
    <div class="ec-report-section">ENGINE-BY-ENGINE SCORES & FINDINGS</div><div class="ec-report-engines" id="ecReportEngines"></div>
@@ -248,7 +272,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   const st=state(key),d=detail(key);if(st==="skip"||st==="pending")return null;
   if(key==="hash"||key==="bytes")return x.size===y.size&&$("evidenceHashA").textContent===$("evidenceHashB").textContent?100:0;
   if(key==="metadata"){const aa=[x.name,x.size,x.type||"",x.lastModified],bb=[y.name,y.size,y.type||"",y.lastModified];return aa.reduce((n,v,i)=>n+(v===bb[i]?1:0),0)/4*100}
-  if(key==="image"){const m=d.match(/([0-9]+(?:\.[0-9]+)?)%/);return m?Number(m[1]):null}
+  if(key==="image"||key==="perceptual"){const m=d.match(/([0-9]+(?:\.[0-9]+)?)%/);return m?Number(m[1]):null}
   if(key==="text"){if(d.includes("Decoded text is identical"))return 100;const m=d.match(/Changed line positions: (\d+).*?A (\d+) lines \/ B (\d+) lines/);if(m)return Math.max(0,100-Number(m[1])/Math.max(1,Number(m[2]),Number(m[3]))*100);return null}
   if(key==="media"){if((x.type||"").startsWith("image/")&&(y.type||"").startsWith("image/"))return null;return st==="pass"?100:st==="warn"?0:null;}
   return null
@@ -262,16 +286,16 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
  async function openWhenReady(){
   const started=Date.now();
   while(Date.now()-started<90000){
-   const keys=["hash","bytes","metadata","image","text","media"];
+   const keys=["hash","bytes","metadata","image","text","media","perceptual"];
    if(keys.every(k=>state(k)!=="pending")&&$("evidenceResult").classList.contains("show"))break;
    await new Promise(r=>setTimeout(r,120));
   }
   const x=a.files&&a.files[0],y=b.files&&b.files[0];if(!x||!y)return;
   const names=[["FILE A / REFERENCE",x],["FILE B / COMPARISON",y]];
   $("ecReportPair").innerHTML=names.map(([label,f])=>'<div class="ec-report-file"><small>'+label+'</small><strong>'+esc(f.name)+'</strong><span>'+esc(f.type||"MIME type unavailable")+' · '+esc((f.size/1024/1024).toFixed(3))+' MB · '+esc(f.lastModified?new Date(f.lastModified).toLocaleString():"Modified date unavailable")+'</span></div>').join("");
-  const specs=[["hash","SHA-256 fingerprint"],["bytes","Exact byte comparison"],["metadata","File metadata"],["image","Image visual similarity"],["text","Text content"],["media","Media structure"]];
+  const specs=[["hash","SHA-256 fingerprint"],["bytes","Exact byte comparison"],["metadata","File metadata"],["image","Image visual similarity"],["text","Text content"],["media","Media structure"],["perceptual","Perceptual image hash · supplemental"]];
   const rendered=specs.map(([k,t])=>renderEngine(k,t,x,y));$("ecReportEngines").innerHTML=rendered.map(o=>o.html).join("");
-  const exact=rendered[0].v,applicable=[rendered[0].v,...rendered.slice(2).map(o=>o.v)].filter(v=>v!==null),overall=applicable.length?applicable.reduce((s,v)=>s+v,0)/applicable.length:null;
+  const exact=rendered[0].v,applicable=[rendered[0].v,...rendered.slice(2,5).map(o=>o.v),rendered[5].v].filter(v=>v!==null),overall=applicable.length?applicable.reduce((s,v)=>s+v,0)/applicable.length:null;
   $("ecReportScore").textContent=overall===null?"—":Math.round(overall);
   $("ecReportScoreRing").style.setProperty("--score-angle",(overall||0)*3.6+"deg");
   const identical=exact===100;
@@ -279,7 +303,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   $("ecReportSummary").textContent=overall===null?"No comparable engine returned a numerical result.": "Technical compatibility indicator: "+overall.toFixed(1)+"% across "+applicable.length+" applicable categories. Each category is equally weighted; unsupported engines are excluded. Exact integrity (SHA-256 + byte comparison) counts once, not twice. This is a descriptive heuristic, not a certified forensic score.";
   $("ecReportHashes").innerHTML=[["FILE A · SHA-256",$("evidenceHashA").textContent],["FILE B · SHA-256",$("evidenceHashB").textContent]].map(([l,v])=>'<div class="ec-report-hash"><small>'+l+'</small><code>'+esc(v||"Not available")+'</code><button class="ec-report-copy" type="button" data-report-copy="'+esc(v||"")+'">COPY HASH ↗</button></div>').join("");
   $("ecReportHashes").querySelectorAll("[data-report-copy]").forEach(btn=>btn.addEventListener("click",()=>{if(btn.dataset.reportCopy)navigator.clipboard?.writeText(btn.dataset.reportCopy)}));
-  $("ecReportCaveat").innerHTML="<b>Scoring method & limitations</b><br>Overall indicator = simple average of available category scores. Exact integrity is one category (SHA-256 and byte-level check are not double-counted). Metadata score checks four fields. Image score uses 64×64 RGB sample comparison. Text score is based on changed line positions, not semantic similarity. Media score checks browser-exposed structure only. Unsupported engines are excluded, so scores from different file types may not be directly comparable. A high score does not prove authorship, authenticity, absence of manipulation, or AI/human origin.";
+  $("ecReportCaveat").innerHTML="<b>Scoring method & limitations</b><br>Overall indicator = simple average of available category scores. Exact integrity is one category (SHA-256 and byte-level check are not double-counted). Metadata score checks four fields. Image score uses 64×64 RGB sample comparison. Perceptual difference hash is displayed as a supplemental image signal and excluded from the overall average to avoid double-counting similar evidence. Text score is based on changed line positions, not semantic similarity. Media score checks browser-exposed structure only. Unsupported engines are excluded, so scores from different file types may not be directly comparable. A high score does not prove authorship, authenticity, absence of manipulation, or AI/human origin.";
   show();
  }
  run.addEventListener("click",()=>{setTimeout(openWhenReady,80)});
