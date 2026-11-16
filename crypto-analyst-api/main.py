@@ -21,7 +21,7 @@ class Candle(BaseModel):
     volume: float = 0
 
 class AnalysisRequest(BaseModel):
-    symbol: str = Field(min_length=5, max_length=20, pattern=r"^[A-Z0-9]+$")
+    symbol: str = Field(min_length=1, max_length=20, pattern=r"^[A-Z0-9]+$")
     interval: str
     mode: str = "gemini"
     indicators: dict[str, bool] = {}
