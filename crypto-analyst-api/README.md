@@ -25,11 +25,12 @@ The Dockerfile performs the Kronos repository clone and starts the API. Configur
 ## Endpoints
 
 - `GET /health`
+- `GET /dex-candles/{symbol}/{interval}` — DexScreener pool discovery plus GeckoTerminal DEX OHLCV fallback (no API key; public rate limit is approximately 10 requests/minute)
 - `GET /derivatives/{symbol}` — Binance USD-M perpetual funding, open interest, mark/index prices, and recent liquidation-feed sample
 - `GET /marketdata/{symbol}` — Binance 24h quote, top-20 order-book depth/spread/imbalance, and best-match DexScreener pool liquidity
 - `GET /token-risk/{chain_id}/{address}` — GoPlus token-security flags, holder concentration and reported LP lock/burn indicators for supported EVM networks
 
-The frontend loads the top 100 CoinMarketCap listings through its keyless public listings endpoint. The ranked universe is broader than Binance's spot listing universe; a coin may appear in the list but lack a Binance `SYMBOLUSDT` candlestick pair. DEX liquidity is matched heuristically by token symbol and the selected pool is shown in the UI; verify the contract and pool before relying on it.
+The frontend loads the top 100 CoinMarketCap listings through its keyless public listings endpoint. For chart data it first tries Binance spot pairs with several quote currencies, then uses the configured Python API to discover a DEX pool and fetch GeckoTerminal OHLCV when no CEX pair is available. The ranked universe is broader than Binance's spot listing universe; a coin may appear in the list but lack a Binance `SYMBOLUSDT` candlestick pair. DEX liquidity and fallback chart pools are matched heuristically by token symbol and highest reported liquidity; the selected pool address is shown in the UI. This is not a verified CMC-ID-to-contract mapping: verify token contract, chain, and pool before relying on any DEX figures. GeckoTerminal's public API is beta/cached and rate-limited; it may throttle or return no historical bars for thin pools.
 - `POST /analyze` — Gemini interpretation of supplied candle-derived facts
 - `POST /forecast` — Kronos-small forecast, default five sampled paths
 
