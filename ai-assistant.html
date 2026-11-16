@@ -33,11 +33,11 @@
 /* New editorial image carousel */
 .intro-gallery{padding:24px 26px 19px;border:1px solid #354b70;border-radius:20px;background:radial-gradient(ellipse at 90% 0%,#827cff20,transparent 38%),linear-gradient(135deg,#111d33,#0b1425 75%);box-shadow:0 24px 75px #0006}
 .gallery-top{display:flex;align-items:center;justify-content:space-between;gap:16px}.gallery-top h2{font-size:clamp(21px,3vw,29px);letter-spacing:-.055em;margin:8px 0 4px}.gallery-top p{font-size:11px;color:#96a7c2;margin:0}.slide-count{font:9px 'DM Mono';color:#cbd8f2;border:1px solid #465a7b;border-radius:24px;padding:8px 11px;background:#17243a;white-space:nowrap}
-.gallery-stage{position:relative;margin-top:17px}.gallery-stage .slide{display:none;grid-template-columns:minmax(0,1.35fr) minmax(190px,.8fr);gap:24px;align-items:center;min-height:270px;padding:0;animation:fade .45s ease}.gallery-stage .slide.active{display:grid}
+.gallery-stage{position:relative;margin-top:17px}.gallery-stage{display:grid;grid-template-columns:minmax(0,1fr)}.gallery-stage .slide{display:grid;grid-area:1/1;grid-template-columns:minmax(0,1.35fr) minmax(190px,.8fr);gap:24px;align-items:center;min-height:270px;padding:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .7s ease,visibility .7s ease}.gallery-stage .slide.active{opacity:1;visibility:visible;pointer-events:auto}
 .slide-visual{height:250px;overflow:hidden;border:1px solid #52658c77;border-radius:14px;background:#101a30;box-shadow:0 14px 38px #0005;position:relative}.slide-visual svg{display:block;width:100%;height:100%;object-fit:cover}.slide-copy{padding:10px 8px 10px 0}.slide-index{font:9px 'DM Mono';letter-spacing:.18em;color:#70dfd2}.slide-copy h3{font-size:clamp(19px,2.5vw,26px);line-height:1.2;letter-spacing:-.05em;margin:12px 0 10px;color:#eff3ff}.slide-copy p{font-size:11px;line-height:1.9;color:#a2b1c9;margin:0}.slide-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:17px}.slide-tags span{font:8px 'DM Mono';letter-spacing:.05em;color:#c6d7f4;padding:7px 9px;border:1px solid #435878;border-radius:30px;background:#18263d}
 .intro-gallery .intro-controls{margin-top:14px}.intro-gallery .dots button{width:24px;height:5px}.intro-gallery .dots button.active{width:42px}.intro-gallery .slide-actions button{padding:9px 14px;border-radius:8px}.intro-gallery .slide-actions button.primary{background:linear-gradient(110deg,#5c80e9,#8b70ed 58%,#4ebdae);box-shadow:0 7px 20px #6b70e52c}
 @media(max-width:700px){.intro-gallery{padding:18px}.gallery-stage .slide,.gallery-stage .slide.active{grid-template-columns:1fr;gap:15px}.slide-visual{height:190px}.slide-copy{padding:0 2px 4px}.slide-copy h3{margin:8px 0}.gallery-top h2{font-size:22px}.gallery-top p{font-size:10px}}
-@media(prefers-reduced-motion:reduce){.gallery-stage .slide{animation:none}}
+@media(prefers-reduced-motion:reduce){.gallery-stage .slide{transition:none}}
 </style>
 </head>
 <body>
@@ -49,7 +49,7 @@
 </section>
 <section class="intro intro-gallery" aria-label="AI visual onboarding">
 <div class="gallery-top"><div><span class="intro-kicker">ORIGINVAULT / AI EXPERIENCE</span><h2>Intelligence, made visible.</h2><p>Explore the systems behind your digital world.</p></div><span class="slide-count" id="slideCount">01 / 03</span></div>
-<div class="slide-progress" aria-hidden="true"><span id="slideProgress"></span></div>
+
 <div class="gallery-stage">
 <div class="slide active">
 <div class="slide-visual neural-art" role="img" aria-label="Abstract glowing artificial intelligence neural network">
@@ -90,10 +90,10 @@
 </div>
 <script>
 (function(){
- const slides=[...document.querySelectorAll('.slide')],dots=[...document.querySelectorAll('.dots button')],count=document.getElementById('slideCount'),prev=document.getElementById('prevSlide'),next=document.getElementById('nextSlide'),progress=document.getElementById('slideProgress'),guide=document.querySelector('.intro');let current=0,slideTimer=null,progressTimer=null,progressStart=0,paused=false;const slideDuration=3000;
- function stopAutoplay(){if(slideTimer)clearTimeout(slideTimer);if(progressTimer)clearInterval(progressTimer);slideTimer=null;progressTimer=null;}
- function startAutoplay(){stopAutoplay();if(paused||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;progressStart=Date.now();progressTimer=setInterval(()=>{if(progress)progress.style.width=Math.min(100,((Date.now()-progressStart)/slideDuration)*100)+'%';},40);slideTimer=setTimeout(()=>{show((current+1)%slides.length);},slideDuration);}
- function show(n){current=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===current));dots.forEach((d,i)=>d.classList.toggle('active',i===current));count.textContent=String(current+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');prev.disabled=current===0;next.textContent=current===slides.length-1?'START CHATTING ✓':'NEXT SLIDE →';if(progress)progress.style.width='0%';startAutoplay();}
+ const slides=[...document.querySelectorAll('.slide')],dots=[...document.querySelectorAll('.dots button')],count=document.getElementById('slideCount'),prev=document.getElementById('prevSlide'),next=document.getElementById('nextSlide'),guide=document.querySelector('.intro');let current=0,slideTimer=null,paused=false;const slideDuration=4000;
+ function stopAutoplay(){if(slideTimer)clearTimeout(slideTimer);slideTimer=null;}
+ function startAutoplay(){stopAutoplay();if(paused)return;slideTimer=setTimeout(()=>{show((current+1)%slides.length);},slideDuration);}
+ function show(n){current=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===current));dots.forEach((d,i)=>d.classList.toggle('active',i===current));count.textContent=String(current+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');prev.disabled=current===0;next.textContent=current===slides.length-1?'START CHATTING ✓':'NEXT SLIDE →';startAutoplay();}
  prev.addEventListener('click',()=>show(current-1));next.addEventListener('click',()=>{if(current===slides.length-1)document.getElementById('userInput').focus();else show(current+1)});dots.forEach((d,i)=>d.addEventListener('click',()=>show(i)));guide.addEventListener('mouseenter',()=>{paused=true;stopAutoplay()});guide.addEventListener('mouseleave',()=>{paused=false;startAutoplay()});guide.addEventListener('focusin',()=>{paused=true;stopAutoplay()});guide.addEventListener('focusout',e=>{if(!guide.contains(e.relatedTarget)){paused=false;startAutoplay()}});show(0);
  const api='https://originvault-crypto-analyst-api.onrender.com',messages=document.getElementById('messages'),input=document.getElementById('userInput'),send=document.getElementById('sendButton'),form=document.getElementById('chatForm');let history=[];
  function addMessage(role,text,meta){const el=document.createElement('div');el.className='message '+role;const label=document.createElement('small');label.textContent=role==='user'?'YOU':(meta||'ORIGINVAULT ASSISTANT');el.appendChild(label);el.appendChild(document.createTextNode(text));messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el;}
