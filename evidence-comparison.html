@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d19">
+<meta name="description" content="Compare two files privately with local SHA-256 fingerprints and exact byte comparison. Free Evidence Comparison Lab by ORIGINVAULT.">
+<title>ORIGINVAULT — Evidence Comparison Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/styles.css?v=20261116-1">
+<style>
+:root{--ec-bg:#080d19;--ec-panel:#111b2e;--ec-line:#293b59;--ec-muted:#96a6c1;--ec-blue:#8eacff;--ec-violet:#b49bff;--ec-mint:#65ddd0}
+body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
+.ec-shell{min-height:100vh;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 10%,#20294c66,transparent 45%),#080d19}
+.ec-grid{position:absolute;inset:0;z-index:-2;opacity:.25;background-image:linear-gradient(#829fff12 1px,transparent 1px),linear-gradient(90deg,#829fff12 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(#000,transparent 85%)}
+.ec-glow{position:absolute;z-index:-1;width:380px;height:380px;border-radius:50%;filter:blur(110px);opacity:.16;pointer-events:none;background:#547cff;top:110px;left:-180px;animation:glowDrift 12s ease-in-out infinite alternate}
+.ec-glow.two{background:#9d70ed;left:auto;right:-200px;top:370px;animation-delay:-5s}
+.ec-main{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:72px 0 90px}
+.ec-hero{text-align:center;max-width:790px;margin:0 auto 46px;animation:rise .8s ease both}
+.ec-kicker{font:10px 'DM Mono',monospace;letter-spacing:.2em;color:#9bb3e9}
+.ec-kicker i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ec-mint);box-shadow:0 0 14px var(--ec-mint);margin-right:10px}
+.ec-hero h1{font-size:clamp(42px,7vw,76px);letter-spacing:-.075em;line-height:1.02;margin:22px 0 17px;color:#f4f6ff}
+.ec-hero h1 span{background:linear-gradient(100deg,#91b2ff,#c0a4ff 55%,#68ded0);background-clip:text;color:transparent}
+.ec-hero p{max-width:640px;margin:auto;color:#a0aec5;font-size:14px;line-height:1.9}
+.ec-orb{width:126px;height:126px;margin:0 auto 24px;position:relative;display:grid;place-items:center}
+.ec-orb:before,.ec-orb:after{content:"";position:absolute;inset:4px;border:1px solid #7696df66;border-radius:50%;box-shadow:0 0 40px #6989e522,inset 0 0 32px #6989e51c;animation:spin 16s linear infinite}
+.ec-orb:after{inset:17px;border-style:dashed;border-color:#8c7cda99;animation-direction:reverse;animation-duration:11s}
+.ec-orb-core{width:58px;height:58px;border-radius:18px;border:1px solid #8eacff;background:linear-gradient(145deg,#243b68,#1a2341);display:grid;place-items:center;font:20px 'DM Mono',monospace;color:#d5e2ff;box-shadow:0 0 35px #7296ff55;animation:coreBeat 3s ease-in-out infinite}
+.ec-node{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--ec-mint);box-shadow:0 0 15px var(--ec-mint)}
+.ec-node.n1{top:8px;left:60px}.ec-node.n2{bottom:14px;right:5px;background:var(--ec-violet);box-shadow:0 0 15px var(--ec-violet)}
+.ec-panel{border:1px solid #314363;border-radius:22px;background:linear-gradient(145deg,#111d32ed,#0d1628f2);box-shadow:0 30px 100px #0006;padding:clamp(20px,4vw,38px);position:relative;overflow:hidden;animation:rise .9s .12s ease both}
+.ec-panel:before{content:"";position:absolute;left:10%;right:10%;top:0;height:1px;background:linear-gradient(90deg,transparent,#8eacff,#b49bff,#65ddd0,transparent);opacity:.8}
+.ec-panel-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px}
+.ec-panel-head strong{font:10px 'DM Mono',monospace;letter-spacing:.15em;color:#c4d4f4}
+.ec-private{font:9px 'DM Mono',monospace;color:#77d9cb;border:1px solid #2a665d;background:#102a2a;padding:9px 12px;border-radius:30px;white-space:nowrap}
+.ec-files{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ec-file{min-width:0;min-height:215px;border:1px dashed #465d83;border-radius:15px;background:linear-gradient(145deg,#17264088,#111a2b88);padding:22px;position:relative;transition:.25s;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.ec-file:hover,.ec-file.drag{border-color:#9cb5ff;background:#1a2a47;box-shadow:0 0 0 3px #7898ff14}
+.ec-file input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.ec-file-icon{width:48px;height:48px;border:1px solid #6d8cd2;border-radius:14px;display:grid;place-items:center;color:#bdd0ff;font-size:23px;background:#1a2b4b;margin-bottom:14px;box-shadow:0 0 24px #7296ff20}
+.ec-file h2{font-size:14px;margin:0 0 6px;color:#f0f4ff}
+.ec-file p{font-size:10px;color:#8fa1bf;margin:0;line-height:1.7}
+.ec-file-meta{margin-top:13px;max-width:100%;overflow-wrap:anywhere;color:#a9bcdf;font:9px 'DM Mono',monospace}
+.ec-actions{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:24px 0 10px}
+.ec-run{border:0;border-radius:8px;padding:15px 24px;background:linear-gradient(105deg,#6479e9,#9677e8 55%,#4dbeb5);color:white;font:800 10px Manrope,sans-serif;letter-spacing:.12em;cursor:pointer;box-shadow:0 10px 30px #657ce833;transition:transform .2s,box-shadow .2s}
+.ec-run:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 34px #657ce855}.ec-run:disabled{opacity:.4;cursor:not-allowed}
+.ec-clear{border:1px solid #3b4e6d;border-radius:8px;padding:14px 19px;background:#17243a;color:#aebbd0;font:700 10px Manrope,sans-serif;cursor:pointer}
+.ec-status{text-align:center;color:#92a3bf;font:10px 'DM Mono',monospace;min-height:20px;line-height:1.7}
+.ec-result{display:none;margin-top:26px;border:1px solid #344969;border-radius:15px;background:#0b1425;padding:22px;animation:rise .4s ease both}
+.ec-result.show{display:block}
+.ec-verdict{font-size:clamp(17px,3vw,23px);font-weight:800;color:#d8e5ff;margin-bottom:8px}
+.ec-explain{font-size:12px;color:#9eafc9;line-height:1.8}
+.ec-hashes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.ec-hash{min-width:0;padding:15px;border:1px solid #293b59;border-radius:10px;background:#111d30}
+.ec-hash small{display:block;font:9px 'DM Mono',monospace;color:#92a8cf;letter-spacing:.12em;margin-bottom:9px}
+.ec-hash code{font:10px 'DM Mono',monospace;color:#c7d8fb;overflow-wrap:anywhere;line-height:1.7}
+.ec-hash button{display:block;margin-top:10px;padding:0;border:0;background:none;color:#8eacff;font-size:10px;cursor:pointer}
+.ec-note{margin-top:24px;padding:18px 20px;border:1px solid #283954;border-radius:12px;background:#0d1729;color:#91a2bd;font-size:10px;line-height:1.9}
+.ec-note strong{color:#c5d5f1}
+.ec-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.ec-step{border:1px solid #263650;border-radius:12px;padding:17px;background:#101a2b99}
+.ec-step b{font:10px 'DM Mono',monospace;color:#8eaaff}.ec-step h3{font-size:12px;margin:10px 0 5px}.ec-step p{font-size:10px;line-height:1.7;color:#91a1ba;margin:0}
+.ec-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:34px;color:#697b98;font:9px 'DM Mono',monospace;letter-spacing:.1em}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes coreBeat{50%{transform:scale(1.07);filter:brightness(1.35)}}@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}@keyframes glowDrift{to{transform:translate(80px,45px) scale(1.2)}}
+@media(max-width:700px){.ec-main{width:calc(100% - 28px);padding:48px 0 65px}.ec-panel-head{align-items:flex-start;flex-direction:column}.ec-files,.ec-hashes{grid-template-columns:1fr}.ec-file{min-height:180px}.ec-steps{grid-template-columns:1fr}.ec-hero h1{font-size:46px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="ec-shell"><div class="ec-grid"></div><div class="ec-glow"></div><div class="ec-glow two"></div>
+<header class="site-header"><a class="brand" href="/"><span class="brand-symbol">O<span></span></span><span>ORIGIN<span class="brand-light">VAULT</span></span></a><nav class="main-nav"><a href="/">All systems</a><a href="/ai.html">Media detection</a><a href="/token-intelligence.html">Token intelligence</a></nav><div class="header-actions"><a class="header-cta" href="/ai.html">← MEDIA SYSTEM</a></div></header>
+<main class="ec-main">
+<section class="ec-hero"><div class="ec-orb" aria-hidden="true"><span class="ec-orb-core">SHA<br>256</span><i class="ec-node n1"></i><i class="ec-node n2"></i></div><div class="ec-kicker"><i></i> ORIGINVAULT / FREE LOCAL TOOL</div><h1>Evidence<br><span>Comparison Lab.</span></h1><p>Two files. Two fingerprints. One precise comparison. Check whether digital evidence is byte-for-byte identical — privately, right inside your browser.</p></section>
+<section class="ec-panel" aria-label="File comparison tool">
+<div class="ec-panel-head"><strong>01 / SELECT TWO FILES</strong><span class="ec-private">✦ 100% LOCAL · NO UPLOAD</span></div>
+<div class="ec-files">
+<label class="ec-file" id="dropA"><input id="evidenceFileA" type="file"><span class="ec-file-icon">＋</span><h2>FILE A / REFERENCE</h2><p>Drop a file here or browse your device</p><span class="ec-file-meta" id="evidenceNameA">No file selected · Max 100 MB</span></label>
+<label class="ec-file" id="dropB"><input id="evidenceFileB" type="file"><span class="ec-file-icon">＋</span><h2>FILE B / COMPARISON</h2><p>Drop a file here or browse your device</p><span class="ec-file-meta" id="evidenceNameB">No file selected · Max 100 MB</span></label>
+</div>
+<div class="ec-actions"><button class="ec-run" id="evidenceCompare" type="button" disabled>RUN EXACT COMPARISON ↗</button><button class="ec-clear" id="evidenceClear" type="button">RESET</button></div><div class="ec-status" id="evidenceStatus" role="status" aria-live="polite">Select two files to begin · Files stay on this device.</div>
+<div class="ec-result" id="evidenceResult" aria-live="polite"><div class="ec-verdict" id="evidenceVerdict"></div><div class="ec-explain" id="evidenceExplain"></div><div class="ec-hashes"><div class="ec-hash"><small>FILE A · SHA-256</small><code id="evidenceHashA"></code><button type="button" data-copy-evidence="a">COPY FINGERPRINT ↗</button></div><div class="ec-hash"><small>FILE B · SHA-256</small><code id="evidenceHashB"></code><button type="button" data-copy-evidence="b">COPY FINGERPRINT ↗</button></div></div><div class="ec-note" id="evidenceDetails"></div></div>
+</section>
+<section class="ec-steps"><article class="ec-step"><b>01 / FINGERPRINT</b><h3>SHA-256 hashing</h3><p>Generate a cryptographic fingerprint for each selected file in your browser.</p></article><article class="ec-step"><b>02 / VERIFY</b><h3>Byte-level comparison</h3><p>Compare the actual file bytes, not just names, sizes or visible previews.</p></article><article class="ec-step"><b>03 / REPORT</b><h3>Clear result</h3><p>See both fingerprints and whether exact equality was confirmed.</p></article></section>
+<div class="ec-note"><strong>Important limitations:</strong> Matching files are byte-for-byte identical, but a different result does not necessarily mean their visible or audible content differs. Metadata, compression or re-encoding can change file bytes. This tool does not prove authorship, authenticity, AI origin or what a file depicts. Each file must be 100 MB or smaller.</div>
+<footer class="ec-footer"><span>ORIGINVAULT · EVIDENCE COMPARISON LAB</span><span>PRIVATE BY DESIGN · FREE TO USE</span><a href="/ai.html">BACK TO MEDIA DETECTION ↗</a></footer>
+</main></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id),a=$("evidenceFileA"),b=$("evidenceFileB"),run=$("evidenceCompare"),clear=$("evidenceClear"),status=$("evidenceStatus"),result=$("evidenceResult"),MAX=100*1024*1024;let hashes={a:"",b:""};
+ function size(n){if(n<1024)return n+" B";if(n<1048576)return(n/1024).toFixed(1)+" KB";return(n/1048576).toFixed(2)+" MB"}
+ function update(input,id){const f=input.files&&input.files[0];$(id).textContent=f?f.name+" · "+size(f.size):"No file selected · Max 100 MB";run.disabled=!(a.files&&a.files[0]&&b.files&&b.files[0]);result.classList.remove("show")}
+ [a,b].forEach((el,i)=>el.addEventListener("change",()=>update(el,i?"evidenceNameB":"evidenceNameA")));
+ ["dropA","dropB"].forEach(id=>{const el=$(id);el.addEventListener("dragover",e=>{e.preventDefault();el.classList.add("drag")});["dragleave","drop"].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();el.classList.remove("drag")}));el.addEventListener("drop",e=>{const input=el.querySelector("input");if(e.dataTransfer.files.length){try{input.files=e.dataTransfer.files;input.dispatchEvent(new Event("change",{bubbles:true}))}catch{status.textContent="Use the file picker to select this file."}}})});
+ function hex(buf){return Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+ async function digest(file){return hex(await crypto.subtle.digest("SHA-256",await file.arrayBuffer()))}
+ async function sameBytes(x,y){if(x.size!==y.size)return false;const chunk=1024*1024;for(let o=0;o<x.size;o+=chunk){const [u,v]=await Promise.all([x.slice(o,o+chunk).arrayBuffer(),y.slice(o,o+chunk).arrayBuffer()]),p=new Uint8Array(u),q=new Uint8Array(v);for(let i=0;i<p.length;i++)if(p[i]!==q[i])return false}return true}
+ function signature(file){return file.slice(0,16).arrayBuffer().then(buf=>{const x=new Uint8Array(buf),s=(p,n)=>String.fromCharCode(...x.slice(p,p+n));if(x[0]===255&&x[1]===216&&x[2]===255)return"JPEG image";if(s(0,8)==="\x89PNG\r\n\x1a\n")return"PNG image";if(s(0,4)==="RIFF"&&s(8,4)==="WEBP")return"WebP image";if(s(0,4)==="fLaC")return"FLAC audio";if(s(0,4)==="OggS")return"Ogg audio";if(s(0,3)==="ID3")return"MP3 audio";if(s(4,4)==="ftyp")return"MP4 / QuickTime";if(s(0,4)==="%PDF")return"PDF document";return"Unknown / other"})}
+ run.addEventListener("click",async()=>{const x=a.files&&a.files[0],y=b.files&&b.files[0];if(!x||!y)return;if(x.size>MAX||y.size>MAX){status.textContent="Each file must be 100 MB or smaller.";return}if(!window.crypto||!crypto.subtle){status.textContent="SHA-256 unavailable. Open this page over HTTPS in a modern browser.";return}
+ run.disabled=true;clear.disabled=true;result.classList.remove("show");status.textContent="Calculating File A fingerprint…";
+ try{hashes.a=await digest(x);status.textContent="Calculating File B fingerprint…";hashes.b=await digest(y);status.textContent="Comparing exact bytes and inspecting file signatures…";const [same,fmtA,fmtB]=await Promise.all([hashes.a===hashes.b?sameBytes(x,y):Promise.resolve(false),signature(x),signature(y)]);$("evidenceHashA").textContent=hashes.a;$("evidenceHashB").textContent=hashes.b;$("evidenceVerdict").textContent=same?"MATCH — BYTE-FOR-BYTE IDENTICAL":"DIFFERENT FILES";$("evidenceExplain").textContent=same?"Both files have the same size, SHA-256 fingerprint and exact byte content. They are identical copies.":"The files differ at the byte level. This does not necessarily mean their visible or audible content is different."; $("evidenceDetails").textContent="File A: "+size(x.size)+" · "+fmtA+" | File B: "+size(y.size)+" · "+fmtB+(x.type&&y.type&&x.type!==y.type?" | Declared MIME types differ.":"");result.classList.add("show");status.textContent="Comparison complete · processed locally in your browser."}
+ catch(e){status.textContent="Comparison failed: "+(e&&e.message||"Unknown browser error")}finally{run.disabled=false;clear.disabled=false}});
+ clear.addEventListener("click",()=>{a.value="";b.value="";hashes={a:"",b:""};update(a,"evidenceNameA");update(b,"evidenceNameB");status.textContent="Select two files to begin · Files stay on this device."});
+ result.querySelectorAll("[data-copy-evidence]").forEach(btn=>btn.addEventListener("click",async()=>{const v=hashes[btn.dataset.copyEvidence];if(!v)return;try{await navigator.clipboard.writeText(v);status.textContent="Fingerprint copied to clipboard."}catch{status.textContent="Clipboard access is unavailable in this browser."}}));
+})();
+</script>
+</body></html>
