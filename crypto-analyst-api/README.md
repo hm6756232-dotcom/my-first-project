@@ -69,3 +69,17 @@ Kronos is a financial-candlestick forecasting model, not a news/research LLM. Th
 ## Multi-exchange derivatives notes
 
 The derivatives endpoint queries Binance, Bybit and OKX independently. A symbol can exist on one venue but not another; the response reports each venue's status and only aggregates fields actually returned. Open interest is reported in USD when the exchange supplies a USD value, or estimated as contract quantity × mark price where possible. Funding and long/short account ratios are arithmetic averages of the available venue values, not a volume-weighted CoinGlass-style composite. Do not compare raw open-interest contract quantities across venues. Public exchange APIs are rate-limited and can be temporarily unavailable. Liquidations are not shown as totals because complete market-wide feeds require WebSocket subscriptions and exchange-specific event interpretation.
+
+
+## OriginVault AI Assistant
+
+The site-wide assistant is available at `/ai-assistant.html` and uses the existing lightweight API service:
+- `GET /assistant/health` — reports whether optional AI providers are configured.
+- `POST /assistant/chat` — answers site questions using configured providers, with provider fallback.
+
+Optional server-side environment variables (never place these in frontend files or Git):
+- `GEMINI_API_KEY` — enables Gemini; assistant model defaults to `gemini-2.5-flash` and can be changed with `ASSISTANT_GEMINI_MODEL`.
+- `GROQ_API_KEY` — enables Groq; optional model override: `GROQ_ASSISTANT_MODEL`.
+- `OPENROUTER_API_KEY` — enables OpenRouter; optional model override: `OPENROUTER_ASSISTANT_MODEL`.
+
+The router tries configured providers in this order: Gemini, Groq, OpenRouter. If no provider key is set, a built-in site-guide mode answers common navigation questions without an external model. Free model availability, rate limits and quotas are controlled by each provider and can change. The endpoint applies a basic per-IP in-memory request limit; this is not a substitute for production-grade authentication or distributed abuse protection. The assistant is informational and cannot execute arbitrary actions, access user files, submit transactions or move funds. Never share passwords, wallet private keys or recovery phrases.
