@@ -164,10 +164,14 @@ def token_risk(chain_id: int, address: str):
         raise HTTPException(400, "Unsupported EVM chain")
     if not (address.startswith("0x") and len(address) == 42):
         raise HTTPException(400, "Invalid EVM contract address")
+    goplus_token = os.getenv("GOPLUS_ACCESS_TOKEN")
+    if not goplus_token:
+        raise HTTPException(503, "GoPlus security is not configured. Set GOPLUS_ACCESS_TOKEN on the server.")
     try:
         r = requests.get(
             f"https://api.gopluslabs.io/api/v1/token_security/{chain_id}",
-            params={"contract_addresses": address},
+            params={"contract_addresses": address.lower()},
+            headers={"Authorization": "Bearer " + goplus_token},
             timeout=15
         )
         r.raise_for_status()
@@ -189,10 +193,18 @@ def token_risk(chain_id: int, address: str):
             "Owner can change balance": flag("owner_change_balance"),
             "Cannot sell all": flag("cannot_sell_all"),
             "Trading cooldown": flag("trading_cooldown"),
+            "Open source": flag("is_open_source"),
+            "Can pause transfers": flag("transfer_pausable"),
+            "Can blacklist wallets": flag("is_blacklisted"),
+            "Hidden owner": flag("hidden_owner"),
+            "Ownership reclaim": flag("can_take_back_ownership"),
+            "Owner token share": token.get("owner_percent", "Unknown"),
+            "Contract in DEX": flag("is_in_dex"),
+            "Other reported risks": token.get("other_potential_risks") or "None reported",
             "Owner address": token.get("owner_address") or "Unknown",
             "Holder count": token.get("holder_count") or "Unknown",
-            "Top 10 holder concentration": Array.isArray(token.holders) ? token.holders.slice(0,10).reduce((s,h)=>s+Number(h.percent||0),0).toFixed(2)+"%" : "Unknown",
-            "LP locked/burned share (reported)": Array.isArray(token.lp_holders) ? token.lp_holders.filter(h=>h.is_locked==="1" || h.is_burned==="1").reduce((s,h)=>s+Number(h.percent||0),0).toFixed(2)+"%" : "Unknown"
+            "Top 10 holder concentration": Array.isArray(token.holders) ? (100*token.holders.slice(0,10).reduce((s,h)=>s+Number(h.percent||0),0)).toFixed(2)+"%" : "Unknown",
+            "LP locked/burned share (reported)": Array.isArray(token.lp_holders) ? (100*sum(float(h.get("percent") or 0) for h in token.lp_holders if str(h.get("is_locked"))=="1")).__round__(2).__str__()+"%" : "Unknown"
         }
         return {"chainId": chain_id, "address": address, "checks": checks, "source": "GoPlus Token Security API", "warning": "Automated flags are incomplete and can be stale or evaded. This is not an audit or proof of safety."}
     except HTTPException:
