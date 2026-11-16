@@ -105,6 +105,9 @@ def marketdata(symbol: str):
         raise HTTPException(502, "Binance market depth unavailable: " + str(e)[:180])
     dex_pair = None
     dex_liq = None
+    dex_pair_address = None
+    dex_url = None
+    dex_volume24h = None
     try:
         q = symbol[:-4] if symbol.endswith("USDT") else symbol
         dex_r = requests.get("https://api.dexscreener.com/latest/dex/search", params={"q": q}, timeout=12)
@@ -116,12 +119,15 @@ def marketdata(symbol: str):
             chosen = exact[0]
             dex_pair = chosen.get("chainId","?") + " / " + chosen.get("dexId","?") + " / " + str(chosen.get("baseToken",{}).get("symbol","")) + "-" + str(chosen.get("quoteToken",{}).get("symbol",""))
             dex_liq = (chosen.get("liquidity") or {}).get("usd")
+            dex_pair_address = chosen.get("pairAddress")
+            dex_url = chosen.get("url")
+            dex_volume24h = (chosen.get("volume") or {}).get("h24")
     except Exception:
         pass
     return {
         "symbol": symbol, "exchange": "Binance Spot", "volume24h": float(ticker.get("quoteVolume") or 0),
         "spreadPct": spread, "imbalance": imbalance, "bidDepthUsd": bid_usd, "askDepthUsd": ask_usd,
-        "dexPair": dex_pair, "dexLiquidityUsd": dex_liq,
+        "dexPair": dex_pair, "dexPairAddress": dex_pair_address, "dexUrl": dex_url, "dexVolume24h": dex_volume24h, "dexLiquidityUsd": dex_liq,
         "depthLevels": 20, "note": "Order-book depth is a snapshot and can change rapidly."
     }
 
