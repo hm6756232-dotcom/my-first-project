@@ -14,7 +14,7 @@ pip install -r requirements.txt
 git clone --depth 1 https://github.com/shiyu-coder/Kronos.git /opt/Kronos
 export PYTHONPATH=/opt/Kronos
 export GEMINI_API_KEY="your-key" # optional; never put this in frontend code or Git
-export GEMINI_MODEL="gemini-2.5-flash"
+export GEMINI_MODEL="gemini-3.8-flash"
 export CORS_ORIGINS="https://originvault.onrender.com"
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
