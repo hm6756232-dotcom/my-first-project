@@ -8,42 +8,42 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/styles.css?v=20261115-3">
 
 <style>
-.evidence-lab-jump{display:inline-block;margin-top:8px;color:#315f9f;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:4px}.evidence-lab{padding:76px max(6vw,24px);background:#f0f3fa;border-top:1px solid #dce3ef;border-bottom:1px solid #dce3ef}
-.evidence-lab-inner{max-width:1180px;margin:auto}
-.evidence-lab-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}
-.evidence-lab-head h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.05em;margin:8px 0}
-.evidence-lab-head p{max-width:590px;color:#65738b;line-height:1.7;font-size:14px}
-.evidence-lab-local{font:10px 'DM Mono',monospace;letter-spacing:.12em;color:#18765f;border:1px solid #a6d9ca;background:#e6f6f0;padding:10px 12px;border-radius:5px;white-space:nowrap}
-.evidence-lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.evidence-file-card{background:#fff;border:1px solid #dce3ee;border-radius:10px;padding:22px;min-width:0}
-.evidence-file-card label{display:block;font:10px 'DM Mono',monospace;letter-spacing:.12em;color:#66758c;margin-bottom:12px}
-.evidence-file-card input{display:block;width:100%;font:13px Manrope,sans-serif;color:#29364c}
-.evidence-file-card input::file-selector-button{border:1px solid #cbd5e4;background:#f5f7fb;color:#273750;padding:10px 12px;border-radius:5px;margin-right:10px;cursor:pointer}
-.evidence-file-name{margin-top:14px;font-size:13px;font-weight:700;overflow-wrap:anywhere;color:#1c2b42}
-.evidence-file-meta{margin-top:5px;color:#718097;font:10px 'DM Mono',monospace}
-.evidence-lab-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
-.evidence-lab-run{border:0;background:#172a48;color:white;border-radius:6px;padding:14px 22px;font:700 11px Manrope,sans-serif;letter-spacing:.08em;cursor:pointer}
-.evidence-lab-run:disabled{opacity:.45;cursor:not-allowed}
-.evidence-lab-clear{border:1px solid #cbd5e4;background:transparent;color:#53627a;border-radius:6px;padding:13px 17px;font:600 11px Manrope,sans-serif;cursor:pointer}
-.evidence-lab-status{font-size:12px;color:#53627a;line-height:1.6}
-.evidence-lab-result{display:none;margin-top:22px;background:#fff;border:1px solid #dce3ee;border-radius:10px;padding:22px}
-.evidence-lab-result.show{display:block}
-.evidence-lab-verdict{font-size:17px;font-weight:800;color:#172a48;margin-bottom:7px}
-.evidence-lab-explain{font-size:12px;color:#66758c;line-height:1.7}
-.evidence-lab-hashes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
-.evidence-hash{min-width:0;background:#f5f7fb;border:1px solid #e3e8f0;padding:14px;border-radius:6px}
-.evidence-hash small{display:block;font:9px 'DM Mono',monospace;letter-spacing:.1em;color:#77859b;margin-bottom:8px}
-.evidence-hash code{font:10px 'DM Mono',monospace;overflow-wrap:anywhere;color:#243957}
-.evidence-hash button{display:block;margin-top:10px;border:0;background:transparent;color:#3566bc;padding:0;font-size:10px;cursor:pointer}
-.evidence-lab-foot{margin-top:16px;color:#7b879a;font-size:10px;line-height:1.7}
-@media(max-width:720px){.evidence-lab{padding:52px 18px}.evidence-lab-head{display:block}.evidence-lab-local{display:inline-block;margin-top:8px}.evidence-lab-grid,.evidence-lab-hashes{grid-template-columns:1fr}.evidence-file-card{padding:17px}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width:720px){.evidence-lab-grid,}
 </style>
 </head>
 <body>
 
 <header class="site-header">
 <a class="brand" href="/"><span class="brand-symbol">O<span></span></span><span>ORIGIN<span class="brand-light">VAULT</span></span></a>
-<nav class="main-nav"><a href="/">All systems</a><a href="/token-intelligence.html">Token intelligence</a><a href="#how">How it works</a><a href="#standards">Our standards</a><a href="#evidence-lab">Evidence Lab</a><a href="#history">Recent scans</a></nav>
+<nav class="main-nav"><a href="/">All systems</a><a href="/token-intelligence.html">Token intelligence</a><a href="#how">How it works</a><a href="#standards">Our standards</a><a href="/evidence-comparison.html">Evidence Lab</a><a href="#history">Recent scans</a></nav>
 <div class="header-actions"><a class="header-cta" href="/">← CHOOSE A SYSTEM</a><a class="header-cta" href="#scanner">Start a scan <span>↗</span></a></div>
 </header>
 <main>
@@ -54,20 +54,11 @@
 <article class="story-slide slide-two"><div class="story-copy"><div class="eyebrow">PROCESS · 02 / 03</div><h1>Measure first;<br><span>never guess.</span></h1><p>Calculate a SHA-256 fingerprint and inspect the actual file signature, metadata, and provenance markers.</p><a class="primary-button" href="#how">See the process ↓</a></div><div class="story-visual"><div class="hash-orbit"></div><div class="hash-core"><span>SHA</span><strong>256</strong><small>FINGERPRINT</small></div><div class="hash-node node-a">FILE SIGNATURE <b>✓</b></div><div class="hash-node node-b">METADATA <b>✓</b></div><div class="hash-node node-c">C2PA MARKER <b>?</b></div></div></article>
 <article class="story-slide slide-three"><div class="story-copy"><div class="eyebrow">REPORT · 03 / 03</div><h1>One clear report;<br><span>every check explained.</span></h1><p>See what was confirmed, what was not, and what could not be checked—without false certainty.</p><a class="primary-button" href="#scanner">Start a free scan ↗</a></div><div class="story-visual"><div class="report-sheet"><div class="report-head">ORIGINVAULT <b>REPORT / 001</b></div><h3>Evidence summary</h3><div class="report-row">SHA-256 fingerprint <b class="yes">✓ YES</b></div><div class="report-row">File signature <b class="yes">✓ YES</b></div><div class="report-row">C2PA verification <b class="unknown">— UNKNOWN</b></div><div class="report-row">AI / deepfake <b class="unknown">— NOT CHECKED</b></div><small>NO FALSE CERTAINTY · JUST EVIDENCE</small></div></div></article>
 </div><div class="story-bottom"><span>ORIGINVAULT / AI MEDIA DETECTION</span><div class="story-dots"><i></i><i></i><i></i></div><span>FREE TO START · 100 MB MAX</span></div></section>
-<section class="scanner-section" id="scanner"><div class="scanner-heading"><div><div class="eyebrow">ORIGINVAULT SCANNER</div><h2>Start with evidence.</h2><p>Upload an image, video, or audio file. Your analysis starts here.</p><a class="evidence-lab-jump" href="#evidence-lab">Compare two files privately ↓</a></div><div class="scanner-free"><span>✦</span> Free to start</div></div>
+<section class="scanner-section" id="scanner"><div class="scanner-heading"><div><div class="eyebrow">ORIGINVAULT SCANNER</div><h2>Start with evidence.</h2><p>Upload an image, video, or audio file. Your analysis starts here.</p><a class="evidence-lab-jump" href="/evidence-comparison.html">Open Evidence Comparison Lab ↗</a></div><div class="scanner-free"><span>✦</span> Free to start</div></div>
 <div class="scanner-layout"><div class="upload-card" id="dropZone"><div class="upload-card-top"><span class="step-label">01 <i>/</i> MEDIA UPLOAD</span><span class="secure-label"><span>⌑</span> PRIVATE SESSION</span></div><div class="upload-content"><div class="upload-graphic"><div class="upload-ring"></div><div class="upload-arrow">↑</div></div><h3>Drop your file here</h3><p>or choose a file from your device</p><div class="upload-limit">Maximum file size: <strong>100 MB</strong></div><input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/heic,image/tiff,video/mp4,video/quicktime,video/webm,audio/mpeg,audio/wav,audio/mp4,audio/ogg,audio/flac"><label class="choose-button" for="fileInput">Choose file <span>↗</span></label><div class="selected-file hidden" id="selectedFileName" aria-live="polite">No file selected</div><button type="button" class="choose-button upload-action hidden" id="uploadNow" disabled>Upload selected file <span>↑</span></button><div id="uploadFallbackStatus" class="selected-file" aria-live="polite"></div><div class="format-list"><span>IMAGE</span><span>VIDEO</span><span>AUDIO</span><span>MAX 100 MB</span></div></div><div class="media-scan-stage" aria-hidden="true"><div class="media-scan-visual"><span class="scan-frame"></span><span class="scan-beam"></span><span class="scan-wave"></span><span class="scan-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div><div class="media-scan-copy"><strong>MULTIMEDIA SCAN</strong><span>Visual indicators for image, video, and audio while processing</span></div><div class="media-kinds"><b>IMAGE</b><b>VIDEO</b><b>AUDIO</b></div></div><div class="upload-footer"><span class="footer-lock">⌑</span>Your file is uploaded in a private session.</div></div>
 <div class="scan-side"><div class="scan-side-head"><span class="step-label">02 <i>/</i> CHECKS INCLUDED</span><span class="live-indicator"><i></i> READY</span></div><div class="scope-item"><div class="scope-icon hash-icon">#</div><div><strong>SHA-256 fingerprint</strong><span>A cryptographic fingerprint based on the file bytes</span></div><span class="scope-state ready">ACTIVE</span></div><div class="scope-item"><div class="scope-icon provenance-icon">⌁</div><div><strong>File signature & media type</strong><span>Compare the actual file header with its declared type</span></div><span class="scope-state ready">ACTIVE</span></div><div class="scope-item"><div class="scope-icon ai-icon">◫</div><div><strong>Metadata & dimensions</strong><span>Inspect metadata and file properties</span></div><span class="scope-state ready">ACTIVE</span></div><div class="scope-item"><div class="scope-icon provenance-icon">◈</div><div><strong>C2PA marker check</strong><span>Look for possible markers; certificate validation is not performed</span></div><span class="scope-state limited">LIMITED</span></div><div class="scope-item"><div class="scope-icon ai-icon">✳</div><div><strong>AI detection for images & video</strong><span>Specialist model estimates for supported formats</span></div><span class="scope-state limited">CHECK PER SCAN</span></div><div class="scope-item"><div class="scope-icon ai-icon">♫</div><div><strong>AI-generated speech detection</strong><span>Audio deepfake analysis via Resemble Detect; requires a private API key</span></div><span class="scope-state limited">PROVIDER / CREDITS</span></div><div class="scope-note"><span>i</span><p>We distinguish verified technical evidence from unavailable checks. A file hash alone does not prove authorship or authenticity.</p></div></div></div>
 <div class="upload-progress-modal" id="uploadProgressModal" aria-hidden="true"><div class="upload-progress-backdrop"></div><section class="progress-card hidden" id="progressWrap" role="status" aria-live="polite"><div class="upload-progress-heading"><span class="upload-progress-mark">OV</span><div><strong>SECURE UPLOAD</strong><span>ORIGINVAULT · LIVE PROCESS</span></div><span class="upload-live-dot"></span></div><div class="progress-orbit" aria-hidden="true"><span></span><i></i><b></b></div><div class="progress-content"><div class="progress-top"><span id="progressLabel">Preparing your scan…</span><strong id="progressPct">0%</strong></div><div class="progress-track"><span id="progressBar"></span></div><div class="progress-caption"><span class="pulse-dot"></span> ENCRYPTED SESSION · DO NOT CLOSE THIS WINDOW</div></div><div class="upload-progress-footnote">Your file is being processed securely. You can follow each stage here.</div><button type="button" id="closeUploadProgress" class="upload-progress-close hidden">Close</button></section></div><div class="result-card hidden" id="resultPanel"></div><div class="report-modal" id="reportModal" aria-hidden="true"><div class="report-modal-backdrop" data-report-close></div><section class="report-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reportModalHeading"><header class="report-modal-header"><div><div class="eyebrow">ORIGINVAULT / ANALYSIS COMPLETE</div><h2 id="reportModalHeading">Your evidence report</h2><p>One clear view of every check, signal and limitation.</p></div><button class="report-modal-close" type="button" id="closeReportModal" aria-label="Close report">×</button></header><div class="report-modal-body" id="reportModalBody"></div><footer class="report-modal-footer"><span>PRIVATE SESSION · EVIDENCE-LED REPORTING</span><button type="button" class="modal-done" data-report-close>Close report</button></footer></section></div></section>
-<section class="evidence-lab" id="evidence-lab"><div class="evidence-lab-inner">
-<div class="evidence-lab-head"><div><div class="eyebrow">ORIGINVAULT / FREE LOCAL TOOL</div><h2>Evidence Comparison Lab</h2><p>Compare two media files using SHA-256 fingerprints. Find out whether they are byte-for-byte identical, or whether even one byte differs. Useful for checking duplicate downloads, file copies and evidence hand-offs.</p></div><span class="evidence-lab-local">100% IN YOUR BROWSER · NO UPLOAD</span></div>
-<div class="evidence-lab-grid">
-<div class="evidence-file-card"><label for="evidenceFileA">FILE A / ORIGINAL OR REFERENCE</label><input id="evidenceFileA" type="file"><div class="evidence-file-name" id="evidenceNameA">No file selected</div><div class="evidence-file-meta" id="evidenceMetaA">Choose any file up to 100 MB</div></div>
-<div class="evidence-file-card"><label for="evidenceFileB">FILE B / COPY TO COMPARE</label><input id="evidenceFileB" type="file"><div class="evidence-file-name" id="evidenceNameB">No file selected</div><div class="evidence-file-meta" id="evidenceMetaB">Choose any file up to 100 MB</div></div>
-</div>
-<div class="evidence-lab-actions"><button class="evidence-lab-run" id="evidenceCompare" type="button" disabled>COMPARE FILES ↗</button><button class="evidence-lab-clear" id="evidenceClear" type="button">Clear</button><span class="evidence-lab-status" id="evidenceStatus" role="status" aria-live="polite">Select two files to begin.</span></div>
-<div class="evidence-lab-result" id="evidenceResult" aria-live="polite"><div class="evidence-lab-verdict" id="evidenceVerdict"></div><div class="evidence-lab-explain" id="evidenceExplain"></div><div class="evidence-lab-hashes"><div class="evidence-hash"><small>FILE A · SHA-256</small><code id="evidenceHashA"></code><button type="button" data-copy-evidence="a">Copy fingerprint</button></div><div class="evidence-hash"><small>FILE B · SHA-256</small><code id="evidenceHashB"></code><button type="button" data-copy-evidence="b">Copy fingerprint</button></div></div><div class="evidence-lab-foot" id="evidenceDetails"></div></div>
-<p class="evidence-lab-foot">Privacy: files are read locally by your browser and are never sent to ORIGINVAULT or an external provider. This tool compares file bytes; it does not determine who created a file, whether its content is authentic, or whether two visually similar files depict the same scene. SHA-256 equality is checked alongside a byte comparison.</p>
-</div></section>
+
 
 <section class="history-section" id="history"><div class="history-title"><div><div class="eyebrow">YOUR SESSION ARCHIVE</div><h2>Recent scans</h2><p>Reports saved in this browser session.</p></div><button class="text-button" id="refreshHistory">Refresh ↻</button></div><div class="history-list" id="historyList"><div class="history-empty"><span>◷</span><p>Your reports will appear here after your first upload.</p></div></div><div class="history-footnote">Guest history is tied to this browser. Clearing browser data or switching devices may make previous reports unavailable.</div></section>
 <section class="how-section" id="how"><div class="how-intro"><div class="eyebrow">A MORE TRANSPARENT STANDARD</div><h2>More checks;<br><span>a clearer picture.</span></h2><p>Digital authenticity is complex. We make evidence understandable without treating one signal as the answer to every question.</p></div><div class="how-steps"><article><div class="how-number">01</div><div class="how-symbol">#</div><h3>IDENTIFY</h3><p>Create a SHA-256 fingerprint and compare the actual file signature with its declared media type.</p><span class="available">AVAILABLE NOW</span></article><article><div class="how-number">02</div><div class="how-symbol">◈</div><h3>TRACE PROVENANCE</h3><p>Inspect embedded metadata, media dimensions and possible C2PA/JUMBF markers. A marker is not a verified credential.</p><span class="planned">MARKER CHECK ONLY</span></article><article><div class="how-number">03</div><div class="how-symbol">✳</div><h3>ASSESS</h3><p>Show exactly which checks ran. AI image and video estimates are provided by a connected specialist engine where the file format is supported. Results remain estimates, not proof.</p><span class="planned">CHECK PER SCAN</span></article></div></section>
@@ -75,39 +66,4 @@
 </main><footer class="site-footer"><a class="brand" href="/"><span class="brand-symbol">O</span><span>ORIGIN<span class="brand-light">VAULT</span></span></a><div class="footer-center"><span>© 2026 ORIGINVAULT</span><span class="footer-note">Media integrity, made transparent.</span></div><div class="footer-links"><a class="social-x" href="https://x.com/OriginVaultAi" aria-label="Follow ORIGINVAULT on X" title="Follow ORIGINVAULT on X" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3L12 14.6 5.6 22H2.5l7.3-8.4L1.9 2h6.5l4.5 6.8L18.9 2Zm-1.1 18h1.7L7.4 3.9H5.6L17.8 20Z" fill="currentColor"/></svg><span>FOLLOW ON X</span></a></div></footer><div class="toast" id="toast" role="status"></div><script type="module" src="/app.js?v=20261115-2"></script><script>(function(){var b=document.getElementById("uploadNow"),i=document.getElementById("fileInput"),s=document.getElementById("uploadFallbackStatus"),n=document.getElementById("selectedFileName");if(!b||!i||!s)return;var moduleScript=document.querySelector('script[type="module"][src^="/app.js"]');if(moduleScript){moduleScript.addEventListener("error",function(){s.textContent="SCANNER MODULE LOAD FAILED — /app.js or its Supabase dependency could not be loaded. Please report this message."})}window.addEventListener("error",function(e){s.textContent="SCANNER RUNTIME ERROR — "+(e.message||"module execution failed")+" | "+(e.filename||"unknown file")+":"+e.lineno+":"+e.colno});window.addEventListener("unhandledrejection",function(e){var r=e.reason;s.textContent="SCANNER INITIALIZATION ERROR — "+(r&&r.message||String(r||"unknown error"))});setTimeout(function(){if(typeof window.ORIGINVAULT_UPLOAD!=="function"&&!s.textContent.startsWith("SCANNER "))s.textContent="SCANNER MODULE DID NOT REGISTER — the browser did not complete /app.js initialization."},5000);function sync(){var f=i.files&&i.files[0];if(n){n.textContent=f?"Selected: "+f.name:"No file selected";n.classList.toggle("hidden",!f)}b.disabled=!f;b.classList.toggle("hidden",!f);s.textContent=f?"File selected. Click Upload to begin.":""}i.addEventListener("change",sync);sync();b.addEventListener("click",async function(){var f=i.files&&i.files[0];s.textContent="CLICK RECEIVED — checking scanner…";if(!f){s.textContent="No file selected. Choose file first.";return}if(typeof window.ORIGINVAULT_UPLOAD!=="function"){s.textContent="The page received your click, but the scanner script did not initialize. Please report this message.";return}b.disabled=true;b.textContent="Uploading…";s.textContent="Scanner started. Preparing secure upload…";try{await window.ORIGINVAULT_UPLOAD(f)}catch(e){s.textContent="Upload error: "+(e&&e.message||"Unknown error")}finally{b.disabled=false;b.innerHTML="Upload selected file <span>↑</span>"}})})();</script>
 <script>(function(){var gate=document.getElementById("modeGateway");document.querySelectorAll("[data-enter-media]").forEach(function(link){link.addEventListener("click",function(e){e.preventDefault();if(gate){gate.classList.add("gateway-exit");setTimeout(function(){gate.remove();document.getElementById("scanner")?.scrollIntoView({behavior:"smooth"});},420);}})});})();</script>
 
-<script>
-(function(){
- const byId=id=>document.getElementById(id);
- const a=byId("evidenceFileA"),b=byId("evidenceFileB"),run=byId("evidenceCompare"),clear=byId("evidenceClear"),status=byId("evidenceStatus"),result=byId("evidenceResult");
- const MAX=100*1024*1024;let hashes={a:"",b:""};
- function size(n){if(n<1024)return n+" B";if(n<1048576)return (n/1024).toFixed(1)+" KB";return (n/1048576).toFixed(2)+" MB"}
- function selected(input,nameId,metaId){const f=input.files&&input.files[0];byId(nameId).textContent=f?f.name:"No file selected";byId(metaId).textContent=f?size(f.size)+" · "+(f.type||"Unknown MIME type")+" · "+new Date(f.lastModified).toLocaleString():"Choose any file up to 100 MB";run.disabled=!(a.files&&a.files[0]&&b.files&&b.files[0])}
- a.addEventListener("change",()=>{selected(a,"evidenceNameA","evidenceMetaA");result.classList.remove("show")});
- b.addEventListener("change",()=>{selected(b,"evidenceNameB","evidenceMetaB");result.classList.remove("show")});
- function hex(buffer){return Array.from(new Uint8Array(buffer)).map(x=>x.toString(16).padStart(2,"0")).join("")}
- async function digest(file){const buffer=await file.arrayBuffer();return hex(await crypto.subtle.digest("SHA-256",buffer))}
- async function identicalBytes(x,y){if(x.size!==y.size)return false;const chunk=1024*1024;for(let offset=0;offset<x.size;offset+=chunk){const [u,v]=await Promise.all([x.slice(offset,offset+chunk).arrayBuffer(),y.slice(offset,offset+chunk).arrayBuffer()]);const p=new Uint8Array(u),q=new Uint8Array(v);for(let i=0;i<p.length;i++)if(p[i]!==q[i])return false;}return true}
- function signature(file){return file.slice(0,16).arrayBuffer().then(buf=>{const x=new Uint8Array(buf),s=(p,n)=>String.fromCharCode(...x.slice(p,p+n));if(x[0]===255&&x[1]===216&&x[2]===255)return"JPEG image";if(s(0,8)==="\x89PNG\r\n\x1a\n")return"PNG image";if(s(0,4)==="RIFF"&&s(8,4)==="WEBP")return"WebP image";if(s(0,4)==="\x1aE\xdf\xa3")return"WebM / Matroska";if(s(0,4)==="fLaC")return"FLAC audio";if(s(0,4)==="OggS")return"Ogg audio";if(s(0,3)==="ID3")return"MP3 audio";if(s(4,4)==="ftyp")return"MP4 / QuickTime family";if(s(0,4)==="%PDF")return"PDF document";return"Unknown / unsupported signature"})}
- run.addEventListener("click",async()=>{
-  const x=a.files&&a.files[0],y=b.files&&b.files[0];if(!x||!y)return;
-  if(x.size>MAX||y.size>MAX){status.textContent="Each file must be 100 MB or smaller.";return}
-  if(!window.crypto||!crypto.subtle){status.textContent="Secure SHA-256 is unavailable in this browser. Open the HTTPS site in a modern browser.";return}
-  run.disabled=true;clear.disabled=true;result.classList.remove("show");status.textContent="Calculating File A fingerprint…";
-  try{
-   hashes.a=await digest(x);status.textContent="Calculating File B fingerprint…";
-   hashes.b=await digest(y);status.textContent="Checking exact bytes and file signatures…";
-   const [sameBytes,fmtA,fmtB]=await Promise.all([hashes.a===hashes.b?identicalBytes(x,y):Promise.resolve(false),signature(x),signature(y)]);
-   const sameHash=hashes.a===hashes.b;
-   byId("evidenceHashA").textContent=hashes.a;byId("evidenceHashB").textContent=hashes.b;
-   byId("evidenceVerdict").textContent=sameBytes?"MATCH — BYTE-FOR-BYTE IDENTICAL":sameHash?"HASH MATCH — VERIFY RESULT":"DIFFERENT FILES";
-   byId("evidenceExplain").textContent=sameBytes?"Both files have the same size, SHA-256 fingerprint and exact byte content. This confirms they are identical copies.":sameHash?"The SHA-256 fingerprints match, but the byte comparison did not confirm equality. Do not treat this as an identical-file result.":"The files differ at the byte level. This does not necessarily mean their visible or audible content is different.";
-   byId("evidenceDetails").textContent="File A: "+size(x.size)+" · "+fmtA+" | File B: "+size(y.size)+" · "+fmtB+(x.type&&y.type&&x.type!==y.type?" | Declared MIME types differ.":"");
-   result.classList.add("show");status.textContent="Comparison complete. Files were processed locally.";
-  }catch(err){status.textContent="Comparison failed: "+(err&&err.message||"Unknown browser error");}
-  finally{run.disabled=false;clear.disabled=false;}
- });
- clear.addEventListener("click",()=>{a.value="";b.value="";hashes={a:"",b:""};selected(a,"evidenceNameA","evidenceMetaA");selected(b,"evidenceNameB","evidenceMetaB");result.classList.remove("show");status.textContent="Select two files to begin."});
- result.querySelectorAll("[data-copy-evidence]").forEach(btn=>btn.addEventListener("click",async()=>{const value=hashes[btn.dataset.copyEvidence];if(!value)return;try{await navigator.clipboard.writeText(value);status.textContent="Fingerprint copied to clipboard."}catch{status.textContent="Clipboard access is unavailable in this browser."}}));
-})();
-</script>
 </body></html>
