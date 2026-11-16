@@ -23,31 +23,14 @@
 @media(max-width:760px){.ti-journey-grid{grid-template-columns:1fr;gap:22px}.ti-journey-copy>p{max-width:unset}.ti-route-step{padding:12px;grid-template-columns:36px 1fr 22px}.ti-route-step>b{width:34px;height:34px}.ti-journey-foot{gap:10px}}
 @media(prefers-reduced-motion:reduce){.ti-journey *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
-/* Restored interactive walkthrough slideshows */
-.ov-walkthrough{margin:0 0 30px;padding:clamp(20px,3.5vw,34px);border:1px solid #394b6b;border-radius:18px;background:radial-gradient(ellipse at 92% 0%,#a995ff20,transparent 38%),radial-gradient(ellipse at 5% 100%,#6cdbd018,transparent 42%),linear-gradient(135deg,#111d32,#0b1526);box-shadow:0 22px 65px #0006;color:#eff3ff;position:relative;overflow:hidden}
-.ov-walk-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}.ov-walk-kicker{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:#7edbd2}.ov-walk-head h2{font-size:clamp(21px,3vw,31px);line-height:1.15;letter-spacing:-.04em;margin:10px 0 0}.ov-walk-head h2 em{font-style:normal;background:linear-gradient(100deg,#a995ff,#6cdbd0);color:transparent;background-clip:text}.ov-walk-count{flex:none;padding:8px 10px;border:1px solid #6477a0;border-radius:6px;color:#c5d4f1;font:10px 'DM Mono',monospace;letter-spacing:.1em}
-.ov-walk-track{position:relative;min-height:205px}.ov-walk-slide{display:none;grid-template-columns:48px minmax(0,1fr) 64px;align-items:center;gap:18px;min-height:205px;padding:clamp(18px,3vw,28px);border:1px solid #829fff30;border-radius:13px;background:linear-gradient(110deg,#1b2942d9,#101b2dd9)}.ov-walk-slide.is-active{display:grid;animation:ovWalkIn .35s ease both}.ov-walk-number{width:44px;height:44px;display:grid;place-items:center;border:1px solid #a995ff88;border-radius:50%;background:#242747;color:#d9d1ff;font:12px 'DM Mono',monospace;box-shadow:0 0 22px #a995ff22}.ov-walk-slide small{font:9px 'DM Mono',monospace;letter-spacing:.13em;color:#7edbd2}.ov-walk-slide h3{font-size:clamp(18px,2.5vw,25px);margin:8px 0;color:#f0f4ff}.ov-walk-slide p{max-width:720px;margin:0;color:#a5b4cc;font-size:12px;line-height:1.85}.ov-walk-symbol{justify-self:center;color:#9d91f0;font:30px 'DM Mono',monospace;text-shadow:0 0 24px #9d91f055}.ov-walk-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.ov-walk-tags span{padding:6px 8px;border:1px solid #4b5e7c;border-radius:4px;color:#b8c9e5;font:8px 'DM Mono',monospace;letter-spacing:.07em}
-.ov-walk-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}.ov-walk-controls button{min-height:38px;padding:0 13px;border:1px solid #4a5e80;border-radius:6px;background:#17243a;color:#d9e3f6;font:9px 'DM Mono',monospace;letter-spacing:.08em;cursor:pointer}.ov-walk-controls button:disabled{opacity:.35;cursor:not-allowed}.ov-walk-dots{display:flex;justify-content:center;gap:8px}.ov-walk-dots button{width:9px;min-height:9px;height:9px;padding:0;border:0;border-radius:50%;background:#53627c}.ov-walk-dots button[aria-current="step"]{width:25px;border-radius:8px;background:linear-gradient(90deg,#a995ff,#6cdbd0)}
-@keyframes ovWalkIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:600px){.ov-walk-head{gap:10px}.ov-walk-slide{grid-template-columns:36px minmax(0,1fr);gap:12px;min-height:unset;padding:17px}.ov-walk-number{width:34px;height:34px;font-size:10px}.ov-walk-symbol{display:none}.ov-walk-slide p{font-size:11px}.ov-walk-controls button{padding:0 9px;font-size:8px}.ov-walk-dots{gap:5px}}
-@media(prefers-reduced-motion:reduce){.ov-walk-slide.is-active{animation:none}}
 </style>
 </head>
 <body>
 <header class="top"><a class="brand" href="/"><span class="brand-mark">O</span><span>ORIGIN<span>VAULT</span></span></a><div class="top-actions"><a class="back" href="/">← CHOOSE A SYSTEM</a></div></header>
 <main class="wrap">
 <section class="intro"><div class="eyebrow">ORIGINVAULT / SYSTEM 02</div><h1>TOKEN <span>INTELLIGENCE</span></h1><p>A multi-dimensional investigation of digital assets. Examine contract permissions, token distribution, liquidity, market behaviour and project fundamentals—across supported blockchain networks.</p></section>
-<section class="ti-journey"
-<section class="ov-walkthrough" id="tokenWalkthrough" aria-label="Token Intelligence slideshow">
-  <div class="ov-walk-head"><div><span class="ov-walk-kicker">INTERACTIVE FIELD GUIDE · TOKEN INTELLIGENCE</span><h2>Understand the investigation, <em>one step at a time.</em></h2></div><span class="ov-walk-count" data-walk-count>01 / 04</span></div>
-  <div class="ov-walk-track" data-walk-track aria-live="polite">
-    <article class="ov-walk-slide is-active"><span class="ov-walk-number">01</span><div><small>START WITH THE RIGHT ASSET</small><h3>Identify the token</h3><p>Enter a token name or, preferably, its contract address. Choose one of the supported EVM networks, or use auto-detect. A contract address helps avoid similarly named assets.</p><div class="ov-walk-tags"><span>CONTRACT ADDRESS</span><span>NETWORK SELECTION</span></div></div><span class="ov-walk-symbol">⌕</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">02</span><div><small>GATHER INDEPENDENT SIGNALS</small><h3>Collect market and contract data</h3><p>The investigation checks available contract permissions, ownership and trading-risk flags, liquidity, volume, price behaviour and project metadata using public data sources.</p><div class="ov-walk-tags"><span>SECURITY SIGNALS</span><span>MARKET DATA</span><span>PROJECT CONTEXT</span></div></div><span class="ov-walk-symbol">⌁</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">03</span><div><small>CHECK THE EVIDENCE</small><h3>Cross-check, don't assume</h3><p>Sources may disagree, omit fields or lack coverage for a token. Missing information is not treated as a clean result, and a proxy contract or configurable permission is a reason to review—not automatic proof of malicious activity.</p><div class="ov-walk-tags"><span>SOURCE CROSS-CHECK</span><span>UNCERTAINTY REVIEW</span></div></div><span class="ov-walk-symbol">⇄</span></article>
-    <article class="ov-walk-slide"><span class="ov-walk-number">04</span><div><small>INTERPRET THE REPORT</small><h3>Review each dimension separately</h3><p>Read security, tokenomics, market and fundamentals sections together. The market heuristic is not a safety score, audit, guarantee or investment recommendation. Verify important findings independently.</p><div class="ov-walk-tags"><span>READ THE CAVEATS</span><span>VERIFY IMPORTANT CLAIMS</span></div></div><span class="ov-walk-symbol">↗</span></article>
-  </div>
-  <div class="ov-walk-controls"><button type="button" data-walk-prev disabled>← PREVIOUS</button><div class="ov-walk-dots" data-walk-dots aria-label="Choose a guide step"></div><button type="button" data-walk-next>NEXT STEP →</button></div>
-</section> aria-labelledby="tiJourneyTitle">
+<section class="ti-journey" aria-labelledby="tiJourneyTitle">
+
   <div class="ti-journey-top"><span class="ti-kicker">FIELD GUIDE / 02</span><span class="ti-live"><i></i> HOW THE INVESTIGATION WORKS</span></div>
   <div class="ti-journey-grid">
     <div class="ti-journey-copy"><div class="ti-index">THE SIGNAL → THE EVIDENCE</div><h2 id="tiJourneyTitle">From token address<br><em>to informed insight.</em></h2><p>Token Intelligence brings market activity, contract signals and project context into one evidence-led report. Follow the path before you launch an analysis.</p><div class="ti-journey-foot"><span>7 SUPPORTED EVM NETWORKS</span><span>NO GUARANTEED VERDICT</span></div></div>
@@ -136,28 +119,5 @@
 })();
 </script>
 
-<script>
-(function(){
- document.querySelectorAll('.ov-walkthrough').forEach(function(root){
-  var slides=Array.from(root.querySelectorAll('.ov-walk-slide'));
-  var prev=root.querySelector('[data-walk-prev]'),next=root.querySelector('[data-walk-next]');
-  var dots=root.querySelector('[data-walk-dots]'),count=root.querySelector('[data-walk-count]'),index=0;
-  if(!slides.length||!prev||!next||!dots||!count)return;
-  slides.forEach(function(_,i){
-   var dot=document.createElement('button');dot.type='button';dot.setAttribute('aria-label','Show guide step '+(i+1));
-   dot.addEventListener('click',function(){show(i)});dots.appendChild(dot);
-  });
-  function show(i){
-   index=Math.max(0,Math.min(slides.length-1,i));
-   slides.forEach(function(slide,n){slide.classList.toggle('is-active',n===index);slide.setAttribute('aria-hidden',n===index?'false':'true')});
-   Array.from(dots.children).forEach(function(dot,n){if(n===index)dot.setAttribute('aria-current','step');else dot.removeAttribute('aria-current')});
-   prev.disabled=index===0;next.disabled=index===slides.length-1;
-   count.textContent=String(index+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
-  }
-  prev.addEventListener('click',function(){show(index-1)});
-  next.addEventListener('click',function(){show(index+1)});
-  show(0);
- });
-})();
-</script>
+
 </body></html>
