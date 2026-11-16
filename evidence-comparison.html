@@ -194,4 +194,95 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
 })();
 </script>
 
+
+<style>
+#ecReportModal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:#030713d9;backdrop-filter:blur(12px)}
+#ecReportModal.open{display:flex;animation:ecModalFade .2s ease}
+.ec-report-window{width:min(980px,100%);max-height:min(92vh,900px);overflow:auto;border:1px solid #52658a;border-radius:20px;background:radial-gradient(ellipse at 85% 0%,#6655a52b,transparent 35%),linear-gradient(145deg,#111e34,#091323);box-shadow:0 35px 120px #000b;color:#edf3ff;position:relative}
+.ec-report-top{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:17px 22px;border-bottom:1px solid #314361;background:#101b2eeF;backdrop-filter:blur(12px)}
+.ec-report-brand{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:#8ee2d7}.ec-report-close{border:1px solid #415474;background:#1a2941;color:#dce7ff;border-radius:8px;width:36px;height:36px;font-size:20px;cursor:pointer}
+.ec-report-body{padding:clamp(18px,3vw,30px)}.ec-report-title{font-size:clamp(24px,4vw,38px);letter-spacing:-.05em;margin:4px 0 7px}.ec-report-sub{font-size:11px;line-height:1.8;color:#9eafc9;margin:0 0 22px}
+.ec-report-scorebar{display:grid;grid-template-columns:180px 1fr;gap:22px;align-items:center;padding:20px;border:1px solid #43577a;border-radius:15px;background:linear-gradient(110deg,#1a2a47,#142038)}
+.ec-report-score{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(#68d9cc var(--score-angle),#293a58 0);position:relative}
+.ec-report-score:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#101c31}
+.ec-report-score-inner{position:relative;text-align:center}.ec-report-score-inner b{display:block;font:800 36px Manrope,sans-serif;letter-spacing:-.06em}.ec-report-score-inner small{font:8px 'DM Mono',monospace;color:#91a8cb;letter-spacing:.12em}
+.ec-report-verdict{font-size:18px;font-weight:800;margin-bottom:8px}.ec-report-explain{font-size:11px;line-height:1.9;color:#a9b8d0}.ec-report-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 22px}
+.ec-report-file{min-width:0;padding:13px;border:1px solid #2c3f5f;border-radius:10px;background:#0d192b}.ec-report-file small{display:block;font:9px 'DM Mono',monospace;color:#91a9d2;margin-bottom:7px}.ec-report-file strong{display:block;font-size:11px;overflow-wrap:anywhere}.ec-report-file span{display:block;margin-top:5px;font-size:9px;color:#8fa2c0;line-height:1.6}
+.ec-report-section{font:10px 'DM Mono',monospace;letter-spacing:.13em;color:#90a9d5;margin:22px 0 11px}
+.ec-report-engines{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ec-report-engine{padding:15px;border:1px solid #2d405f;border-radius:11px;background:#101c30}.ec-report-engine-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.ec-report-engine h4{font-size:12px;margin:0;color:#e7efff}.ec-report-rating{font:800 13px 'DM Mono',monospace;color:#83e0d4;white-space:nowrap}.ec-report-rating.na{color:#a0aeca}.ec-report-meter{height:5px;background:#283954;border-radius:8px;overflow:hidden;margin:12px 0 9px}.ec-report-meter i{display:block;height:100%;width:var(--rating);background:linear-gradient(90deg,#8f9eff,#6cdbd0);border-radius:8px}.ec-report-detail{font-size:10px;line-height:1.8;color:#94a7c5;overflow-wrap:anywhere}
+.ec-report-hashes{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ec-report-hash{padding:12px;border:1px solid #2c3f5f;border-radius:9px;background:#0c1728}.ec-report-hash small{display:block;font:9px 'DM Mono',monospace;color:#8ea7d0;margin-bottom:7px}.ec-report-hash code{font:9px 'DM Mono',monospace;color:#c9d8f4;overflow-wrap:anywhere;line-height:1.7}.ec-report-copy{border:0;background:none;padding:8px 0 0;color:#8eacff;font-size:9px;cursor:pointer}
+.ec-report-caveat{margin-top:18px;padding:14px;border-left:3px solid #b49bff;border-radius:7px;background:#171c34;color:#a7b4cd;font-size:10px;line-height:1.9}.ec-report-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.ec-report-print{border:1px solid #50658a;border-radius:8px;background:#1a2941;color:#dce7ff;padding:11px 15px;font-size:10px;font-weight:700;cursor:pointer}
+@keyframes ecModalFade{from{opacity:0}to{opacity:1}}
+@media(max-width:620px){#ecReportModal{padding:7px}.ec-report-scorebar{grid-template-columns:1fr;text-align:center}.ec-report-engines,.ec-report-pair,.ec-report-hashes{grid-template-columns:1fr}.ec-report-top{padding:12px 15px}}
+@media print{body>*:not(#ecReportModal){display:none!important}#ecReportModal{display:flex!important;position:static;background:white;padding:0}.ec-report-window{max-height:none;overflow:visible;box-shadow:none;background:white;color:#111;border:0}.ec-report-top{position:static;background:white;color:#111}.ec-report-close,.ec-report-actions{display:none!important}.ec-report-engine,.ec-report-file,.ec-report-hash{break-inside:avoid;background:#fff;color:#111}.ec-report-detail,.ec-report-sub,.ec-report-explain,.ec-report-file span{color:#333}}
+</style>
+<div id="ecReportModal" role="dialog" aria-modal="true" aria-labelledby="ecReportTitle">
+ <div class="ec-report-window">
+  <div class="ec-report-top"><span class="ec-report-brand">ORIGINVAULT / FORENSIC ANALYSIS REPORT</span><button class="ec-report-close" id="ecReportClose" type="button" aria-label="Close report">×</button></div>
+  <div class="ec-report-body">
+   <div class="ec-guide-kicker">COMPARISON COMPLETE · LOCAL ANALYSIS</div><h2 class="ec-report-title" id="ecReportTitle">Detailed comparison report</h2><p class="ec-report-sub">Results from the six analysis engines. Scores describe technical similarity only, not authenticity, ownership or trustworthiness.</p>
+   <div class="ec-report-scorebar"><div class="ec-report-score" id="ecReportScoreRing" style="--score-angle:0deg"><div class="ec-report-score-inner"><b id="ecReportScore">—</b><small>COMPATIBILITY</small></div></div><div><div class="ec-report-verdict" id="ecReportVerdict"></div><div class="ec-report-explain" id="ecReportSummary"></div></div></div>
+   <div class="ec-report-pair" id="ecReportPair"></div>
+   <div class="ec-report-section">ENGINE-BY-ENGINE SCORES & FINDINGS</div><div class="ec-report-engines" id="ecReportEngines"></div>
+   <div class="ec-report-section">CRYPTOGRAPHIC FINGERPRINTS</div><div class="ec-report-hashes" id="ecReportHashes"></div>
+   <div class="ec-report-caveat" id="ecReportCaveat"></div>
+   <div class="ec-report-actions"><button class="ec-report-print" id="ecReportPrint" type="button">PRINT / SAVE PDF ↗</button></div>
+  </div>
+ </div>
+</div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id),modal=$("ecReportModal"),close=$("ecReportClose"),run=$("evidenceCompare"),a=$("evidenceFileA"),b=$("evidenceFileB");
+ let lastFocus=null;
+ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+ function show(){lastFocus=document.activeElement;modal.classList.add("open");document.body.style.overflow="hidden";close.focus()}
+ function hide(){modal.classList.remove("open");document.body.style.overflow="";if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+ close.addEventListener("click",hide);modal.addEventListener("click",e=>{if(e.target===modal)hide()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))hide()});
+ $("ecReportPrint").addEventListener("click",()=>window.print());
+ function card(key){return document.querySelector('[data-engine="'+key+'"]')}
+ function state(key){return card(key)?.dataset.status||"skip"}
+ function detail(key){return card(key)?.querySelector(".ec-engine-detail")?.textContent||""}
+ function engineScore(key,x,y){
+  const st=state(key),d=detail(key);if(st==="skip"||st==="pending")return null;
+  if(key==="hash"||key==="bytes")return x.size===y.size&&$("evidenceHashA").textContent===$("evidenceHashB").textContent?100:0;
+  if(key==="metadata"){const aa=[x.name,x.size,x.type||"",x.lastModified],bb=[y.name,y.size,y.type||"",y.lastModified];return aa.reduce((n,v,i)=>n+(v===bb[i]?1:0),0)/4*100}
+  if(key==="image"){const m=d.match(/([0-9]+(?:\.[0-9]+)?)%/);return m?Number(m[1]):null}
+  if(key==="text"){if(d.includes("Decoded text is identical"))return 100;const m=d.match(/Changed line positions: (\d+).*?A (\d+) lines \/ B (\d+) lines/);if(m)return Math.max(0,100-Number(m[1])/Math.max(1,Number(m[2]),Number(m[3]))*100);return null}
+  if(key==="media")return st==="pass"?100:st==="warn"?0:null;
+  return null
+ }
+ function ratingLabel(v){return v===null?"N/A":v.toFixed(1)+"%"}
+ function renderEngine(key,title,x,y){
+  const st=state(key),d=detail(key),v=engineScore(key,x,y),status=st==="skip"?"Not supported for this pair":st==="pass"?"Completed":st==="warn"?"Difference detected":st==="pending"?"Still processing":"Review";
+  const note=key==="hash"||key==="bytes"?"Exact-integrity result; the two checks are combined as one category to avoid double counting.":key==="metadata"?"Score = matching fields out of four (name, size, MIME type, modified date).":key==="image"?"Normalized pixel-sample similarity estimate; not a perceptual or forensic identity score.":key==="text"?"Estimated from changed line positions; not semantic meaning.": "Structural metadata comparison only; not content identity.";
+  return {v,html:'<article class="ec-report-engine"><div class="ec-report-engine-head"><h4>'+esc(title)+'</h4><span class="ec-report-rating '+(v===null?"na":"")+'">'+ratingLabel(v)+'</span></div><div class="ec-report-meter"><i style="--rating:'+(v===null?0:v)+'%"></i></div><div class="ec-report-detail"><b>'+esc(status)+'</b><br>'+esc(d)+'<br><br>'+esc(note)+'</div></article>'}
+ }
+ async function openWhenReady(){
+  const started=Date.now();
+  while(Date.now()-started<90000){
+   const keys=["hash","bytes","metadata","image","text","media"];
+   if(keys.every(k=>state(k)!=="pending")&&$("evidenceResult").classList.contains("show"))break;
+   await new Promise(r=>setTimeout(r,120));
+  }
+  const x=a.files&&a.files[0],y=b.files&&b.files[0];if(!x||!y)return;
+  const names=[["FILE A / REFERENCE",x],["FILE B / COMPARISON",y]];
+  $("ecReportPair").innerHTML=names.map(([label,f])=>'<div class="ec-report-file"><small>'+label+'</small><strong>'+esc(f.name)+'</strong><span>'+esc(f.type||"MIME type unavailable")+' · '+esc((f.size/1024/1024).toFixed(3))+' MB · '+esc(f.lastModified?new Date(f.lastModified).toLocaleString():"Modified date unavailable")+'</span></div>').join("");
+  const specs=[["hash","SHA-256 fingerprint"],["bytes","Exact byte comparison"],["metadata","File metadata"],["image","Image visual similarity"],["text","Text content"],["media","Media structure"]];
+  const rendered=specs.map(([k,t])=>renderEngine(k,t,x,y));$("ecReportEngines").innerHTML=rendered.map(o=>o.html).join("");
+  const exact=rendered[0].v,applicable=rendered.map(o=>o.v).filter(v=>v!==null),overall=applicable.length?applicable.reduce((s,v)=>s+v,0)/applicable.length:null;
+  $("ecReportScore").textContent=overall===null?"—":Math.round(overall);
+  $("ecReportScoreRing").style.setProperty("--score-angle",(overall||0)*3.6+"deg");
+  const identical=exact===100;
+  $("ecReportVerdict").textContent=identical?"Exact copies confirmed":exact===0?"Files differ at byte level":"Partial comparison / review";
+  $("ecReportSummary").textContent=overall===null?"No comparable engine returned a numerical result.": "Technical compatibility indicator: "+overall.toFixed(1)+"% across "+applicable.length+" applicable categories. Each category is equally weighted; unsupported engines are excluded. Exact integrity (SHA-256 + byte comparison) counts once, not twice. This is a descriptive heuristic, not a certified forensic score.";
+  $("ecReportHashes").innerHTML=[["FILE A · SHA-256",$("evidenceHashA").textContent],["FILE B · SHA-256",$("evidenceHashB").textContent]].map(([l,v])=>'<div class="ec-report-hash"><small>'+l+'</small><code>'+esc(v||"Not available")+'</code><button class="ec-report-copy" type="button" data-report-copy="'+esc(v||"")+'">COPY HASH ↗</button></div>').join("");
+  $("ecReportHashes").querySelectorAll("[data-report-copy]").forEach(btn=>btn.addEventListener("click",()=>{if(btn.dataset.reportCopy)navigator.clipboard?.writeText(btn.dataset.reportCopy)}));
+  $("ecReportCaveat").innerHTML="<b>Scoring method & limitations</b><br>Overall indicator = simple average of available category scores. Exact integrity is one category (SHA-256 and byte-level check are not double-counted). Metadata score checks four fields. Image score uses 64×64 RGB sample comparison. Text score is based on changed line positions, not semantic similarity. Media score checks browser-exposed structure only. Unsupported engines are excluded, so scores from different file types may not be directly comparable. A high score does not prove authorship, authenticity, absence of manipulation, or AI/human origin.";
+  show();
+ }
+ run.addEventListener("click",()=>{setTimeout(openWhenReady,80)});
+})();
+</script>
 </body></html>
