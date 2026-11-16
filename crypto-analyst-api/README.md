@@ -2,6 +2,23 @@
 
 Python service for the optional Gemini and Kronos engines. The browser-only technical analysis in `/crypto-analyst.html` does not depend on this service.
 
+## Free Render deployment
+
+The repository-level `render.yaml` preserves the existing static website service and adds a separate **Free** Python web service named `originvault-crypto-analyst-api`. In the Render Dashboard, open the existing Blueprint and apply/sync the new service after this commit appears. Do not create a paid instance.
+
+The lightweight free deployment supports market-data, DEX OHLCV, derivatives, and optional Gemini/GoPlus routes. **Kronos is intentionally disabled** in this profile because loading its PyTorch model is not reliable within the free instance's 512 MB memory. The full `requirements.txt` and Dockerfile remain for a larger host. Render free services sleep after 15 minutes without traffic and may take about a minute to wake.
+
+After Render creates the service, copy its actual `onrender.com` URL into the Python API URL field on `/crypto-analyst.html`. The API hostname is assigned by Render and is not guessed or hard-coded.
+
+Optional environment variables in the new API service:
+- `GEMINI_API_KEY` — enables Gemini interpretation; keep it server-side only.
+- `GEMINI_MODEL` — optional model override.
+- `GOPLUS_ACCESS_TOKEN` — enables GoPlus contract checks.
+- `CORS_ORIGINS` is set by the Blueprint to the production website origin.
+- `KRONOS_ENABLED=false` is set by the Blueprint for the free profile.
+
+Do not add paid services or paid resources.
+
 ## Local run
 
 Python 3.11 is recommended.
