@@ -38,6 +38,8 @@ _model_lock = threading.Lock()
 _predictor = None
 def get_predictor():
     global _predictor
+    if os.getenv("KRONOS_ENABLED", "true").lower() not in ("1", "true", "yes"):
+        raise HTTPException(503, "Kronos is disabled on the free lightweight deployment because its model runtime exceeds the available memory. Other API features remain available.")
     with _model_lock:
         if _predictor is None:
             import torch
@@ -50,7 +52,7 @@ def get_predictor():
 
 @app.get("/health")
 def health():
-    return {"ok": True, "service": "originvault-crypto-analyst", "kronos": "lazy-loaded", "gemini": bool(os.getenv("GEMINI_API_KEY"))}
+    return {"ok": True, "service": "originvault-crypto-analyst", "kronos": "enabled" if os.getenv("KRONOS_ENABLED", "true").lower() in ("1", "true", "yes") else "disabled_on_free_plan", "gemini": bool(os.getenv("GEMINI_API_KEY")), "goplus": bool(os.getenv("GOPLUS_ACCESS_TOKEN"))}
 
 @app.post("/analyze")
 def analyze(req: AnalysisRequest):
