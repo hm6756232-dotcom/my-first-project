@@ -72,7 +72,7 @@ def analyze(req: AnalysisRequest):
               "Clearly label any levels as technical reference levels.\nDATA: " + str(facts))
     try:
         client = genai.Client(api_key=key)
-        model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         response = client.models.generate_content(model=model_name, contents=prompt)
         return {"analysis": response.text or "Gemini returned an empty response.", "model": model_name, "facts": facts}
     except Exception as e:
