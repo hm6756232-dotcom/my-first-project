@@ -125,6 +125,38 @@ def marketdata(symbol: str):
         "depthLevels": 20, "note": "Order-book depth is a snapshot and can change rapidly."
     }
 
+@app.get("/derivatives/{symbol}")
+def derivatives(symbol: str):
+    symbol = symbol.upper()
+    if not symbol.isalnum() or len(symbol) > 20:
+        raise HTTPException(400, "Invalid derivatives symbol")
+    base = "https://fapi.binance.com/fapi/v1"
+    try:
+        premium = requests.get(base + "/premiumIndex", params={"symbol": symbol}, timeout=10)
+        premium.raise_for_status()
+        p = premium.json()
+        oi = requests.get(base + "/openInterest", params={"symbol": symbol}, timeout=10)
+        oi.raise_for_status()
+        interest = oi.json()
+        funding = requests.get(base + "/fundingRate", params={"symbol": symbol, "limit": 1}, timeout=10)
+        funding.raise_for_status()
+        fdata = funding.json()
+        start_ms = int(pd.Timestamp.utcnow().timestamp()*1000)-60*60*1000
+        liquidations = requests.get(base + "/allForceOrders", params={"symbol": symbol, "startTime": start_ms, "limit": 1000}, timeout=10)
+        liquidations.raise_for_status()
+        events = liquidations.json() or []
+        long_usd = sum(float(x.get("price",0))*float(x.get("origQty",0)) for x in events if x.get("side")=="SELL")
+        short_usd = sum(float(x.get("price",0))*float(x.get("origQty",0)) for x in events if x.get("side")=="BUY")
+        return {"available": True, "symbol": symbol, "markPrice": float(p.get("markPrice") or 0),
+                "indexPrice": float(p.get("indexPrice") or 0), "openInterest": float(interest.get("openInterest") or 0),
+                "fundingRate": float(fdata[-1].get("fundingRate")) if fdata else None,
+                "longLiquidationsUsd": long_usd, "shortLiquidationsUsd": short_usd,
+                "note": "Liquidation feed is sampled and may not represent every market liquidation."}
+    except requests.RequestException as e:
+        return {"available": False, "symbol": symbol, "error": str(e)[:160],
+                "markPrice": None, "indexPrice": None, "openInterest": None,
+                "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
+
 @app.get("/token-risk/{chain_id}/{address}")
 def token_risk(chain_id: int, address: str):
     supported = {1, 56, 8453, 137, 42161, 10, 43114}
@@ -159,7 +191,8 @@ def token_risk(chain_id: int, address: str):
             "Trading cooldown": flag("trading_cooldown"),
             "Owner address": token.get("owner_address") or "Unknown",
             "Holder count": token.get("holder_count") or "Unknown",
-            "LP holder summary": "See source response; LP lock/burn is not fully established by this summary."
+            "Top 10 holder concentration": Array.isArray(token.holders) ? token.holders.slice(0,10).reduce((s,h)=>s+Number(h.percent||0),0).toFixed(2)+"%" : "Unknown",
+            "LP locked/burned share (reported)": Array.isArray(token.lp_holders) ? token.lp_holders.filter(h=>h.is_locked==="1" || h.is_burned==="1").reduce((s,h)=>s+Number(h.percent||0),0).toFixed(2)+"%" : "Unknown"
         }
         return {"chainId": chain_id, "address": address, "checks": checks, "source": "GoPlus Token Security API", "warning": "Automated flags are incomplete and can be stale or evaded. This is not an audit or proof of safety."}
     except HTTPException:
