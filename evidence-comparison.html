@@ -151,7 +151,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
 (function(){
  const $=id=>document.getElementById(id),a=$("evidenceFileA"),b=$("evidenceFileB"),run=$("evidenceCompare");
  const cards={};document.querySelectorAll("[data-engine]").forEach(c=>cards[c.dataset.engine]=c);
- const set=(key,state,detail)=>{const c=cards[key];if(!c)return;c.dataset.status=state;c.querySelector(".ec-engine-state").textContent=state==="pass"?"CHECK COMPLETE":state==="warn"?"DIFFERENCE / REVIEW":state==="skip"?"NOT SUPPORTED":"ANALYSIS ERROR";c.querySelector(".ec-engine-detail").textContent=detail};
+ const set=(key,state,detail)=>{const c=cards[key];if(!c)return;c.dataset.status=state;c.querySelector(".ec-engine-state").textContent=state==="pass"?"CHECK COMPLETE":state==="warn"?"DIFFERENCE / REVIEW":state==="skip"?"NOT SUPPORTED":state==="pending"?"ANALYZING…":"ANALYSIS ERROR";c.querySelector(".ec-engine-detail").textContent=detail};
  const size=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(2)+" MB";
  const ext=f=>(f.name.split(".").pop()||"").toLowerCase();
  const textExt=new Set(["txt","md","csv","json","xml","html","htm","js","css","log","yaml","yml","tsv","svg"]);
@@ -173,7 +173,7 @@ body{background:var(--ec-bg);color:#eff3ff;overflow-x:hidden}
   if(type.startsWith("image/"))return imageInfo(file).then(v=>{v.bitmap.close();return "Image dimensions: "+v.width+"×"+v.height});
   if(type.startsWith("audio/")||type.startsWith("video/"))return new Promise((resolve,reject)=>{
    const el=document.createElement(type.startsWith("audio/")?"audio":"video"),url=URL.createObjectURL(file),timer=setTimeout(()=>finish(new Error("Metadata read timed out")),8000);
-   function finish(err){clearTimeout(timer);URL.revokeObjectURL(url);el.removeAttribute("src);try{el.load()}catch{};err?reject(err):resolve("Duration: "+(Number.isFinite(el.duration)?el.duration.toFixed(2)+" seconds":"not exposed")+" · Media type: "+type)}
+   function finish(err){clearTimeout(timer);URL.revokeObjectURL(url);el.removeAttribute("src");try{el.load()}catch{};err?reject(err):resolve("Duration: "+(Number.isFinite(el.duration)?el.duration.toFixed(2)+" seconds":"not exposed")+" · Media type: "+type)}
    el.preload="metadata";el.onloadedmetadata=()=>finish();el.onerror=()=>finish(new Error("Browser could not read media metadata"));el.src=url;
   });
   return Promise.reject(new Error("No supported browser media metadata for this format"));
