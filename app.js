@@ -90,7 +90,11 @@ function likelihoodCopy(l){
  if(l.verdict==="real")return "Resemble Detect classified this audio as REAL. This is a provider model classification, not proof that the recording is authentic or unaltered.";
  if(["detected","positive","watermark_found"].includes(l.status))return "An AI-related signal was reported, but the engine did not provide a calibrated AI-generated percentage.";
  if(["not_detected","negative","clean"].includes(l.status))return "No AI signal was reported by the connected detector. This does not prove human creation.";
- return "AI likelihood cannot currently be estimated because no AI detector is connected to this scan.";
+ if(l.status==="processing")return "The connected detector accepted this file, but analysis is still processing. No verdict is available yet.";
+ if(l.status==="provider_error")return "A connected detector was called but could not complete this analysis. No AI verdict or probability is available.";
+ if(l.status==="unsupported_size"||l.status==="unsupported_media")return "A detector is configured, but this file exceeds its supported size or media-type limits.";
+ if(l.status==="no_score")return "The connected detector completed its request but did not return a usable AI-generated probability.";
+ return "AI likelihood cannot currently be estimated because no compatible detector result is available for this scan.";
 }
 function downloadFullReport(report){
  const a=report.analysis||{},l=report.aiLikelihood||{score:null,status:"not_configured"},esc=escapeHtml;
@@ -125,7 +129,7 @@ function renderResult(r){
  const evidenceHtml=evidence.length?evidence.map(x=>{const severity=String(x.severity||"info").toLowerCase();const details=x.details&&typeof x.details==="object"?JSON.stringify(x.details):String(x.details||"");return `<article class="evidence-row evidence-${escapeHtml(severity)}"><div class="evidence-row-head"><strong>${escapeHtml(x.category||"Evidence")}</strong><span class="evidence-severity">${escapeHtml(severity.toUpperCase())}</span></div><p>${escapeHtml(x.finding||"")}</p><small>${escapeHtml(x.source||"ORIGINVAULT")}</small>${details?`<details><summary>Evidence details</summary><pre>${escapeHtml(details)}</pre></details>`:""}</article>`}).join(""):`<p class="evidence-empty">No additional evidence records were returned.</p>`;
  const aiEngine=detectors.ai_deepfake||{};
  const engineState=String(aiEngine.status||"not_configured").toLowerCase();
- const engineLabel=engineState==="completed"?"RESULT RECEIVED":engineState==="provider_error"?"PROVIDER ERROR":engineState==="unsupported_size"?"SIZE LIMIT":engineState==="unsupported_media"?"NOT SUPPORTED":engineState==="no_score"?"NO SCORE":"NOT CONNECTED";
+ const engineLabel=engineState==="completed"?"RESULT RECEIVED":engineState==="processing"?"PROCESSING":engineState==="provider_error"?"PROVIDER ERROR":engineState==="unsupported_size"?"SIZE LIMIT":engineState==="unsupported_media"?"NOT SUPPORTED":engineState==="no_score"?"NO SCORE":"NOT CONNECTED";
  const engineTone=engineState==="completed"?"ok":engineState==="provider_error"?"warn":"idle";
  const smaugEngine=detectors.smaug||{};
  const smaugState=String(smaugEngine.status||"not_configured").toLowerCase();
