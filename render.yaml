@@ -5,3 +5,18 @@ services:
     buildCommand: echo "No build step required"
     staticPublishPath: .
     autoDeployTrigger: commit
+
+  - type: web
+    name: originvault-crypto-analyst-api
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: crypto-analyst-api
+    buildCommand: pip install --no-cache-dir -r requirements-free.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://originvault.onrender.com
+      - key: KRONOS_ENABLED
+        value: "false"
