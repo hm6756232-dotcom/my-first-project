@@ -336,3 +336,20 @@ body{background:#080d19;color:#eff3ff}
 .toast{background:#202e49;color:#f3f6ff}
 @media(max-width:680px){.gateway-bottom{flex-wrap:wrap}.story-copy h1{color:#f1f4ff}}
 @media(prefers-reduced-motion:reduce){.gateway-option,.media-art-ring,.art-orbit-dot,.art-scanline{animation:none!important;transition:none!important}}
+
+
+/* Evidence Comparison Lab gateway card */
+.gateway-options{grid-template-columns:repeat(3,minmax(0,1fr))}
+.evidence-option{border-color:#31504f;background:linear-gradient(145deg,rgba(18,39,48,.96),rgba(11,20,33,.98))}
+.evidence-option:before{background:radial-gradient(ellipse at 50% 28%,rgba(77,190,181,.2),transparent 62%)}
+.evidence-option:hover{border-color:#5baca4}
+.evidence-option .gateway-option-foot b{color:#75d8ca}
+.evidence-art:before{content:"";position:absolute;width:118px;height:118px;border:1px solid #58bcb366;border-radius:50%;box-shadow:0 0 42px #45c6b322,inset 0 0 32px #45c6b322}
+.evidence-art-orbit{position:absolute;width:142px;height:55px;border:1px dashed #70d6c477;border-radius:50%;transform:rotate(35deg);animation:gatewaySpin 13s linear infinite}
+.evidence-art-orbit.orbit-b{width:135px;height:48px;transform:rotate(-48deg);border-color:#9a9cff88;animation-duration:17s;animation-direction:reverse}
+.evidence-art-core{width:54px;height:54px;display:grid;place-items:center;border:1px solid #67d7c9;border-radius:16px;background:linear-gradient(145deg,#1c4b50,#202d4c);color:#bafff1;font-size:29px;box-shadow:0 0 32px #55d9c755;animation:corePulse 3.2s ease-in-out infinite;z-index:1}
+.evidence-art-spark{position:absolute;width:7px;height:7px;border-radius:50%;background:#75e4d2;box-shadow:0 0 15px #75e4d2;top:16px;left:calc(50% + 58px);animation:gatewaySpin 6s linear infinite;transform-origin:-58px 48px}
+.evidence-art-spark.spark-b{background:#b49bff;box-shadow:0 0 15px #b49bff;animation-duration:9s;animation-direction:reverse;transform-origin:-48px 55px}
+.evidence-art-beam{position:absolute;width:170px;height:1px;background:linear-gradient(90deg,transparent,#71e2d1,transparent);animation:scanSweep 3.2s ease-in-out infinite}
+@media(max-width:900px){.gateway-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.gateway-options{grid-template-columns:1fr}}
