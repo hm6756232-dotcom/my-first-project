@@ -63,7 +63,7 @@ import { JsonRpcProvider, Contract } from 'https://esm.sh/ethers@6.13.5';
  const provider=new JsonRpcProvider('https://rpc.mainnet.chain.robinhood.com',4663);
  const c=new Contract('0xf04bdd19e34d2e290672b3d38b697909dd385399',['function logo() view returns (string)'],provider);
  const logo=await c.logo();
- if(typeof logo==='string' && /^https?:\\/\\//i.test(logo)){const img=document.getElementById('originTokenLogo');img.src=logo;img.hidden=false;}
+ if(typeof logo==='string'){const src=logo.startsWith('ipfs://')?'https://ipfs.io/ipfs/'+logo.slice(7):logo;if(src.startsWith('https://')||src.startsWith('http://')){const img=document.getElementById('originTokenLogo');img.src=src;img.hidden=false;}}
 }catch(e){console.info('OriginVault logo metadata is currently unavailable.')}})();
 </script>
 </body></html>
