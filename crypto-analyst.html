@@ -64,6 +64,42 @@ body{background:radial-gradient(ellipse at 50% -15%,#1c3150 0,transparent 42%),l
  .value-chip{font-size:8px;padding:7px 5px}
  .liquidity-panel .risk-card{padding:8px}
 }
+
+/* Hard override: compact, square, readable liquidity tiles */
+.liquidity-panel{width:100%;min-width:0;box-sizing:border-box;overflow:hidden}
+.liquidity-panel .section-title{font-size:12px!important;line-height:1.5!important;letter-spacing:.08em!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.liquidity-panel .risk-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;width:100%;min-width:0}
+.liquidity-panel .risk-grid>.risk-card{box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:0!important;aspect-ratio:1/1!important;height:auto!important;padding:12px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:9px!important;text-align:center!important;overflow:hidden!important;border-radius:12px!important}
+.liquidity-panel .risk-grid>.risk-card small{display:block!important;width:100%;font-size:clamp(8px,.75vw,10px)!important;line-height:1.5!important;letter-spacing:0!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;margin:0!important}
+.liquidity-panel .risk-grid>.risk-card b{display:block!important;max-width:100%;font-size:clamp(10px,1vw,14px)!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+.value-card{display:grid!important;grid-template-columns:250px minmax(0,1fr)!important;align-items:center!important;gap:28px!important;min-width:0!important}
+.value-gauge-wrap{display:grid!important;place-items:center!important;min-width:0}
+.value-gauge{width:230px!important;max-width:100%;aspect-ratio:1/1!important;position:relative!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:radial-gradient(circle,#0b1828 61%,transparent 62%)!important;box-shadow:0 0 0 1px #57e0c544,0 0 36px #57e0c533!important}
+.value-ring{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:visible}
+.value-ring-track,.value-ring-progress{fill:none;stroke-width:12;stroke-linecap:round}
+.value-ring-track{stroke:#2a3d52}
+.value-ring-progress{stroke:#57e0c5;stroke-dasharray:515.22;stroke-dashoffset:257.61;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dashoffset .7s ease,stroke .35s ease;filter:drop-shadow(0 0 5px #57e0c577)}
+.value-gauge-inner{z-index:2!important;display:grid!important;place-items:center!important;gap:5px!important}
+.value-gauge-inner strong{font-size:48px!important;line-height:1!important}
+.value-details{min-width:0!important}
+.value-breakdown{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+.value-chip{min-width:0!important;overflow-wrap:anywhere!important;word-break:normal!important;text-align:center!important}
+@media(max-width:760px){
+ .liquidity-panel .risk-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ .liquidity-panel .risk-grid>.risk-card{aspect-ratio:1/1!important;width:100%!important;height:auto!important;padding:10px!important;border-radius:10px!important}
+ .liquidity-panel .risk-grid>.risk-card small{font-size:clamp(8px,2.5vw,10px)!important;line-height:1.45!important}
+ .liquidity-panel .risk-grid>.risk-card b{font-size:clamp(10px,3vw,13px)!important;line-height:1.35!important}
+ .value-card{grid-template-columns:minmax(0,1fr)!important;justify-items:center!important;gap:18px!important;padding:22px 14px!important}
+ .value-gauge{width:min(68vw,230px)!important}
+ .value-details{width:100%;text-align:center!important}
+ .value-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .value-scale{gap:4px;font-size:7px!important;letter-spacing:0!important}
+}
+@media(max-width:360px){
+ .liquidity-panel .risk-grid>.risk-card{padding:7px!important}
+ .liquidity-panel .risk-grid>.risk-card small{font-size:8px!important}
+ .value-chip{font-size:8px!important;padding:7px 4px!important}
+}
 </style></head>
 <body><div class="wrap">
 <header class="top"><a class="brand" href="/">ORIGIN<span>VAULT</span> <b>/ ANALYST</b></a><a class="back" href="/">← ALL SYSTEMS</a></header>
@@ -80,7 +116,7 @@ body{background:radial-gradient(ellipse at 50% -15%,#1c3150 0,transparent 42%),l
 <label class="engine"><input type="checkbox" id="useRSI" checked> RSI</label><label class="engine"><input type="checkbox" id="useMACD" checked> MACD</label><label class="engine"><input type="checkbox" id="useEMA" checked> EMA / SMA</label><label class="engine"><input type="checkbox" id="useBB" checked> Bollinger Bands</label><label class="engine"><input type="checkbox" id="useVWAP" checked> VWAP</label><label class="engine"><input type="checkbox" id="useSR" checked> Support / Resistance</label><label class="engine"><input type="checkbox" id="useFIB"> Fibonacci</label><label class="engine"><input type="checkbox" id="useVOL" checked> Volume</label><label class="engine"><input type="checkbox" id="useATR" checked> ATR volatility</label><label class="engine"><input type="checkbox" id="useADX"> ADX trend strength</label><label class="engine"><input type="checkbox" id="useSTOCH"> Stochastic</label><label class="engine"><input type="checkbox" id="useOBV"> OBV</label><label class="engine"><input type="checkbox" id="useCMF"> Chaikin Money Flow</label><label class="engine"><input type="checkbox" id="useMFI"> Money Flow Index</label><label class="engine"><input type="checkbox" id="useICHI"> Ichimoku cloud</label>
 </div>
 <section class="value-card" aria-live="polite" aria-label="Buy attractiveness score">
-<div class="value-gauge-wrap"><div class="value-gauge" id="valueGauge" style="--score:5"><div class="value-gauge-inner"><small>ORIGINVAULT</small><strong id="valueScore">—</strong><span>OUT OF 10</span></div></div></div>
+<div class="value-gauge-wrap"><div class="value-gauge" id="valueGauge" role="img" aria-label="Buy attractiveness score out of ten"><svg class="value-ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="value-ring-track" cx="100" cy="100" r="82"></circle><circle class="value-ring-progress" id="valueRingProgress" cx="100" cy="100" r="82"></circle></svg><div class="value-gauge-inner"><small>ORIGINVAULT</small><strong id="valueScore">—</strong><span>OUT OF 10</span></div></div></div>
 <div class="value-details"><div class="value-kicker">MULTI-METRIC MARKET SIGNAL</div><h2>Buy Attractiveness</h2><div class="value-rating" id="valueRating">WAITING FOR DATA</div><div class="value-breakdown" id="valueBreakdown"><span class="value-empty">AWAITING MARKET DATA</span></div><div class="value-scale"><span>1 · UNATTRACTIVE</span><span>5 · NEUTRAL</span><span>10 · ATTRACTIVE</span></div></div>
 </section><div class="marketbar"><div class="market-stat"><small>MARKET CAP</small><strong id="mcap">—</strong></div><div class="market-stat"><small>FDV / FULLY DILUTED</small><strong id="fdv">—</strong></div><div class="market-stat"><small>24H TURNOVER</small><strong id="turnover">—</strong></div><div class="market-stat"><small>VOLUME / MARKET CAP</small><strong id="volmcap">—</strong></div></div>
 <div class="grid">
@@ -123,7 +159,7 @@ function draw(){if(!candles.length)return;let cv=$('chart'),rect=cv.getBoundingC
  if(marketExtras.openInterestUsd!=null&&q?.market_cap>0){const oi=Number(marketExtras.openInterestUsd)/q.market_cap;add('Open interest / market cap',oi<.01?6:oi<.05?7:oi<.12?5:2,.5)}
  if(marketExtras.volume24h>0&&(marketExtras.bidDepthUsd+marketExtras.askDepthUsd)>0){const depth=(marketExtras.bidDepthUsd+marketExtras.askDepthUsd)/marketExtras.volume24h;add('Order-book depth',depth>.001&&depth<.05?8:depth>=.05&&depth<.15?6:depth>0?4:2,.5)}
  const score=weight?Math.max(1,Math.min(10,total/weight)):null;
- $('valueScore').textContent=score===null?'—':score.toFixed(1);$('valueGauge').style.setProperty('--score',score===null?5:score);
+ $('valueScore').textContent=score===null?'—':score.toFixed(1);const ring=$('valueRingProgress');if(ring){const circumference=2*Math.PI*82;ring.style.strokeDasharray=String(circumference);ring.style.strokeDashoffset=String(circumference*(1-(score===null?0:score/10)));ring.style.stroke=score===null?'#708399':score>=7?'#57e0c5':score>=4?'#e8c36f':'#f07878';}
  $('valueRating').textContent=score===null?'INSUFFICIENT DATA':score>=8?'ATTRACTIVE SETUP':score>=6.5?'MODERATELY ATTRACTIVE':score>=4.5?'NEUTRAL / WAIT':score>=3?'WEAK VALUE':'UNATTRACTIVE HERE';
  $('valueBreakdown').innerHTML=parts.map(([n,v])=>'<span class="value-chip">'+n+' · '+v.toFixed(1)+'</span>').join('')||'<span class="value-empty">AWAITING MARKET DATA</span>';
 }
