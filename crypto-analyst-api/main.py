@@ -190,6 +190,11 @@ def token_risk(chain_id: int, address: str):
             if value in (None, ""):
                 return "Unknown"
             return "Yes / flagged" if str(value) == "1" else "No flag reported"
+        def yes_no(key):
+            value = token.get(key)
+            if value in (None, ""):
+                return "Unknown"
+            return "Yes" if str(value) == "1" else "No"
         checks = {
             "Honeypot flag": flag("is_honeypot"),
             "Buy tax": token.get("buy_tax", "Unknown"),
@@ -199,13 +204,13 @@ def token_risk(chain_id: int, address: str):
             "Owner can change balance": flag("owner_change_balance"),
             "Cannot sell all": flag("cannot_sell_all"),
             "Trading cooldown": flag("trading_cooldown"),
-            "Open source": flag("is_open_source"),
+            "Open source": yes_no("is_open_source"),
             "Can pause transfers": flag("transfer_pausable"),
             "Can blacklist wallets": flag("is_blacklisted"),
             "Hidden owner": flag("hidden_owner"),
             "Ownership reclaim": flag("can_take_back_ownership"),
             "Owner token share": token.get("owner_percent", "Unknown"),
-            "Contract in DEX": flag("is_in_dex"),
+            "Contract in DEX": yes_no("is_in_dex"),
             "Other reported risks": token.get("other_potential_risks") or "None reported",
             "Owner address": token.get("owner_address") or "Unknown",
             "Holder count": token.get("holder_count") or "Unknown",
