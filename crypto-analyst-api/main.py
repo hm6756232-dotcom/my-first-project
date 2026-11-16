@@ -417,45 +417,44 @@ class AssistantChatRequest(BaseModel):
     history: list[dict[str, str]] = Field(default_factory=list, max_length=8)
 
 _assistant_requests = defaultdict(list)
-_ASSISTANT_SYSTEM = """You are OriginVault AI Assistant, the helpful guide for the ORIGINVAULT website.
-Be accurate, warm, concise and practical. Respond in the same language as the user (English or Persian).
+_ASSISTANT_SYSTEM = """You are OriginVault AI Assistant, the English-only guide for the ORIGINVAULT website.
+ALWAYS answer in clear English, even if the user writes in another language. Never output non-English text.
+Be accurate, transparent, concise and practical. Do not guess. Distinguish verified facts, estimates, general knowledge and uncertainty.
 You know these sections:
 1) Media Authenticity (/ai.html): examines image/video/audio for AI-generated signals and provenance; C2PA marker presence is not full cryptographic validation.
 2) Token Intelligence (/token-intelligence.html): examines supported EVM token contracts, tokenomics, liquidity, holders and market signals. It is not a guarantee of safety.
-3) Evidence Comparison Lab (/evidence-comparison.html): local browser-based file comparison using SHA-256, byte-level checks and perceptual image similarity; selected files are processed in the browser, not uploaded by this tool.
+3) Evidence Comparison Lab (/evidence-comparison.html): local browser-based file comparison using SHA-256, byte-level checks and perceptual image similarity; selected files are processed in the browser, not uploaded by this assistant.
 4) AI Crypto Analyst (/crypto-analyst.html): technical indicators, market data and experimental scenarios. Heuristic scores and model output are not financial advice.
 5) OriginVault token overview (/token-project.html): official ORIGINVAI project information.
 You may guide users step by step, explain concepts and interpret result text they voluntarily paste. You may direct users to the relevant page using its exact path.
-IMPORTANT LIMITS: You cannot directly operate website tools, inspect a user's private files, change account settings, submit transactions, move funds, execute code, or perform actions on their behalf. Never claim an action was completed. Never request or accept wallet seed phrases, private keys, passwords or recovery codes; tell users not to share them. Do not invent live prices, analysis results, API status or on-chain facts. For crypto, avoid personalized investment recommendations and state uncertainty. Do not claim to have run a scan or comparison unless the user provides its result.
+GROUNDING RULES: You do not have automatic live web search or direct access to the site's live databases in this chat endpoint. Never invent current prices, market data, contract status, scan results, citations, source URLs or API status. For time-sensitive or on-chain questions, say you cannot verify live data here and direct the user to the relevant live-data tool or ask them to share its output. Do not present model memory as a verified current fact. If uncertain, say so clearly.
+IMPORTANT LIMITS: You cannot directly operate website tools, inspect a user's private files, change account settings, submit transactions, move funds, execute code, or perform actions on their behalf. Never claim an action was completed. Never request or accept wallet seed phrases, private keys, passwords or recovery codes; tell users not to share them. For crypto, avoid personalized investment recommendations and state uncertainty. Do not claim to have run a scan or comparison unless the user provides its result.
 If asked to do something beyond these abilities, explain the limitation and provide the exact section/link and next steps. Prefer short structured answers over long walls of text."""
 
 def _assistant_local_reply(message: str) -> str:
     m = message.lower()
-    persian = any(ch in message for ch in "اآبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی")
-    if any(x in m for x in ("which tool", "which section", "کدام ابزار", "کدوم ابزار", "از کجا شروع")):
-        return ("برای بررسی تصویر، ویدئو یا صدا از Media Authenticity استفاده کنید: /ai.html\n"
-                "برای بررسی قرارداد و وضعیت توکن: /token-intelligence.html\n"
-                "برای مقایسه دو فایل: /evidence-comparison.html\n"
-                "برای اندیکاتورها و سناریوهای بازار: /crypto-analyst.html\n"
-                "برای اطلاعات پروژه ORIGINVAI: /token-project.html")
-    if any(x in m for x in ("compare", "file", "sha-256", "مقایسه", "فایل")):
-        return ("برای مقایسه دو فایل وارد Evidence Comparison Lab شوید: /evidence-comparison.html\n"
-                "دو فایل را انتخاب کنید؛ بررسی SHA-256 و مقایسه بایت‌به‌بایت در مرورگر انجام می‌شود. فایل‌ها از طریق این دستیار آپلود نمی‌شوند.")
-    if any(x in m for x in ("token", "contract", "توکن", "قرارداد", "liquidity", "نقدینگی")):
-        return ("برای بررسی توکن از Token Intelligence استفاده کنید: /token-intelligence.html\n"
-                "شبکه و آدرس قرارداد را با دقت انتخاب کنید. داده‌های نقدینگی و پرچم‌های امنیت قرارداد شاخص‌های متفاوتی هستند و هیچ‌کدام تضمین ایمنی نیستند.")
-    if any(x in m for x in ("crypto", "rsi", "macd", "market", "ارز", "تحلیل", "اندیکاتور")):
-        return ("برای تحلیل تکنیکال وارد AI Crypto Analyst شوید: /crypto-analyst.html\n"
-                "می‌توانید نماد، تایم‌فریم و اندیکاتورها را انتخاب کنید. خروجی‌ها و امتیازها مبتنی بر داده و قواعد تحلیلی‌اند، قطعی نیستند و توصیه مالی محسوب نمی‌شوند.")
-    if any(x in m for x in ("image", "video", "audio", "c2pa", "رسانه", "تصویر", "ویدئو", "صدا")):
-        return ("برای بررسی تصویر، ویدئو یا صدا وارد Media Authenticity شوید: /ai.html\n"
-                "وجود C2PA فقط نشانگر وجود متادیتا/نشانگر است و به‌تنهایی اعتبار رمزنگاری‌شده محتوا را اثبات نمی‌کند.")
-    if persian:
-        return ("من راهنمای ORIGINVAULT هستم. می‌توانم درباره بخش‌های سایت، مراحل استفاده و مفهوم نتایج راهنمایی بدهم.\n"
-                "سؤال‌تان را کمی مشخص‌تر بپرسید یا نتیجه‌ای را که می‌خواهید توضیح بدهم اینجا قرار دهید. لطفاً رمز عبور، کلید خصوصی یا عبارت بازیابی کیف پول را ارسال نکنید.")
-    return ("I'm your OriginVault site guide. I can explain the site's systems, walk you through a workflow, or help interpret result text you share. "
-            "Tell me which section or task you have in mind. Never share passwords, private keys or wallet recovery phrases.")
-
+    if any(x in m for x in ("which tool", "which section", "where do i start", "what tool")):
+        return ("Choose the right OriginVault workspace:\n"
+                "• Media, image, video or audio checks: /ai.html\n"
+                "• Token contracts and token intelligence: /token-intelligence.html\n"
+                "• File comparison: /evidence-comparison.html\n"
+                "• Technical market indicators: /crypto-analyst.html\n"
+                "• ORIGINVAI project information: /token-project.html")
+    if any(x in m for x in ("compare", "file", "sha-256")):
+        return ("Open Evidence Comparison Lab: /evidence-comparison.html\n"
+                "Select two files to compare. SHA-256 and byte-level checks run in your browser; this assistant does not upload your files.")
+    if any(x in m for x in ("token", "contract", "liquidity", "holder")):
+        return ("Open Token Intelligence: /token-intelligence.html\n"
+                "Check the correct network and contract address. Contract-security flags and market liquidity are different signals; neither guarantees safety.")
+    if any(x in m for x in ("crypto", "rsi", "macd", "market", "indicator")):
+        return ("Open AI Crypto Analyst: /crypto-analyst.html\n"
+                "Choose a symbol, timeframe and indicators. Scores and scenarios are heuristic, uncertain and not financial advice.")
+    if any(x in m for x in ("image", "video", "audio", "c2pa", "media")):
+        return ("Open Media Authenticity: /ai.html\n"
+                "C2PA marker presence alone does not prove that content has been cryptographically validated.")
+    return ("I am the built-in OriginVault site guide. I can explain the site's sections and help you choose a workflow. "
+            "For a question requiring live prices, blockchain lookups or a new scan, use the relevant specialist tool; this guide cannot verify live data. "
+            "Never share passwords, private keys or wallet recovery phrases.")
 @app.get("/assistant/health")
 def assistant_health():
     providers = []
@@ -520,7 +519,7 @@ def assistant_chat(req: AssistantChatRequest, request: Request):
     if os.getenv("OPENROUTER_API_KEY"):
         providers.append(("OpenRouter", lambda: _assistant_openai_compatible(
             "https://openrouter.ai/api/v1/chat/completions", os.getenv("OPENROUTER_API_KEY"),
-            os.getenv("OPENROUTER_ASSISTANT_MODEL", "meta-llama/llama-3.3-70b-instruct:free"), messages,
+            os.getenv("OPENROUTER_ASSISTANT_MODEL", "openrouter/free"), messages,
             {"HTTP-Referer": "https://originvault.onrender.com", "X-Title": "ORIGINVAULT AI Assistant"})))
     if not providers:
         return {"reply": _assistant_local_reply(req.message), "provider": "Site Guide",
