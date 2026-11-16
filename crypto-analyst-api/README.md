@@ -15,11 +15,12 @@ git clone --depth 1 https://github.com/shiyu-coder/Kronos.git /opt/Kronos
 export PYTHONPATH=/opt/Kronos
 export GEMINI_API_KEY="your-key" # optional; never put this in frontend code or Git
 export GEMINI_MODEL="gemini-3.8-flash"
+export GOPLUS_ACCESS_TOKEN="your-goplus-token" # optional; required only for contract security checks
 export CORS_ORIGINS="https://originvault.onrender.com"
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-The Dockerfile performs the Kronos repository clone and starts the API. Configure `GEMINI_API_KEY`, `GEMINI_MODEL`, and `CORS_ORIGINS` as server environment variables. Gemini is optional; without a key, the algorithmic engine and Kronos endpoint can still be used.
+The Dockerfile performs the Kronos repository clone and starts the API. Configure `GEMINI_API_KEY`, `GEMINI_MODEL`, `GOPLUS_ACCESS_TOKEN`, and `CORS_ORIGINS` as server environment variables. GoPlus security checks require an access token; obtain one through GoPlus and never place it in the browser. Gemini is optional; without a key, the algorithmic engine and Kronos endpoint can still be used.
 
 ## Endpoints
 
