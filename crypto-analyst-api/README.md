@@ -24,6 +24,10 @@ The Dockerfile performs the Kronos repository clone and starts the API. Configur
 ## Endpoints
 
 - `GET /health`
+- `GET /marketdata/{symbol}` — Binance 24h quote, top-20 order-book depth/spread/imbalance, and best-match DexScreener pool liquidity
+- `GET /token-risk/{chain_id}/{address}` — GoPlus token-security flags for supported EVM networks
+
+The frontend loads the top 100 CoinMarketCap listings through its keyless public listings endpoint. The ranked universe is broader than Binance's spot listing universe; a coin may appear in the list but lack a Binance `SYMBOLUSDT` candlestick pair. DEX liquidity is matched heuristically by token symbol and the selected pool is shown in the UI; verify the contract and pool before relying on it.
 - `POST /analyze` — Gemini interpretation of supplied candle-derived facts
 - `POST /forecast` — Kronos-small forecast, default five sampled paths
 
