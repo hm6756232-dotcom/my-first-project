@@ -78,6 +78,95 @@ def analyze(req: AnalysisRequest):
     except Exception as e:
         raise HTTPException(502, "Gemini request failed: " + str(e)[:300])
 
+@app.get("/marketdata/{symbol}")
+def marketdata(symbol: str):
+    symbol = symbol.upper()
+    if not symbol.isalnum() or len(symbol) > 20:
+        raise HTTPException(400, "Invalid market symbol")
+    base = "https://data-api.binance.vision/api/v3"
+    try:
+        ticker_r = requests.get(base + "/ticker/24hr", params={"symbol": symbol}, timeout=12)
+        ticker_r.raise_for_status()
+        ticker = ticker_r.json()
+        depth_r = requests.get(base + "/depth", params={"symbol": symbol, "limit": 20}, timeout=12)
+        depth_r.raise_for_status()
+        depth = depth_r.json()
+        bids = [(float(p), float(q)) for p, q in depth.get("bids", [])]
+        asks = [(float(p), float(q)) for p, q in depth.get("asks", [])]
+        bid_usd = sum(p*q for p, q in bids)
+        ask_usd = sum(p*q for p, q in asks)
+        best_bid = bids[0][0] if bids else 0
+        best_ask = asks[0][0] if asks else 0
+        mid = (best_bid + best_ask)/2 if best_bid and best_ask else 0
+        spread = ((best_ask-best_bid)/mid*100) if mid else None
+        total_depth = bid_usd + ask_usd
+        imbalance = bid_usd/total_depth if total_depth else None
+    except requests.RequestException as e:
+        raise HTTPException(502, "Binance market depth unavailable: " + str(e)[:180])
+    dex_pair = None
+    dex_liq = None
+    try:
+        q = symbol[:-4] if symbol.endswith("USDT") else symbol
+        dex_r = requests.get("https://api.dexscreener.com/latest/dex/search", params={"q": q}, timeout=12)
+        dex_r.raise_for_status()
+        pairs = dex_r.json().get("pairs") or []
+        exact = [p for p in pairs if (p.get("baseToken",{}).get("symbol","").upper() == q or p.get("quoteToken",{}).get("symbol","").upper() == q)]
+        exact.sort(key=lambda p: float((p.get("liquidity") or {}).get("usd") or 0), reverse=True)
+        if exact:
+            chosen = exact[0]
+            dex_pair = chosen.get("chainId","?") + " / " + chosen.get("dexId","?") + " / " + str(chosen.get("baseToken",{}).get("symbol","")) + "-" + str(chosen.get("quoteToken",{}).get("symbol",""))
+            dex_liq = (chosen.get("liquidity") or {}).get("usd")
+    except Exception:
+        pass
+    return {
+        "symbol": symbol, "exchange": "Binance Spot", "volume24h": float(ticker.get("quoteVolume") or 0),
+        "spreadPct": spread, "imbalance": imbalance, "bidDepthUsd": bid_usd, "askDepthUsd": ask_usd,
+        "dexPair": dex_pair, "dexLiquidityUsd": dex_liq,
+        "depthLevels": 20, "note": "Order-book depth is a snapshot and can change rapidly."
+    }
+
+@app.get("/token-risk/{chain_id}/{address}")
+def token_risk(chain_id: int, address: str):
+    supported = {1, 56, 8453, 137, 42161, 10, 43114}
+    if chain_id not in supported:
+        raise HTTPException(400, "Unsupported EVM chain")
+    if not (address.startswith("0x") and len(address) == 42):
+        raise HTTPException(400, "Invalid EVM contract address")
+    try:
+        r = requests.get(
+            f"https://api.gopluslabs.io/api/v1/token_security/{chain_id}",
+            params={"contract_addresses": address},
+            timeout=15
+        )
+        r.raise_for_status()
+        payload = r.json()
+        token = (payload.get("result") or {}).get(address.lower()) or (payload.get("result") or {}).get(address)
+        if not token:
+            raise HTTPException(404, "GoPlus returned no token security record for this contract")
+        def flag(key):
+            value = token.get(key)
+            if value in (None, ""):
+                return "Unknown"
+            return "Yes / flagged" if str(value) == "1" else "No flag reported"
+        checks = {
+            "Honeypot flag": flag("is_honeypot"),
+            "Buy tax": token.get("buy_tax", "Unknown"),
+            "Sell tax": token.get("sell_tax", "Unknown"),
+            "Mintable": flag("is_mintable"),
+            "Proxy contract": flag("is_proxy"),
+            "Owner can change balance": flag("owner_change_balance"),
+            "Cannot sell all": flag("cannot_sell_all"),
+            "Trading cooldown": flag("trading_cooldown"),
+            "Owner address": token.get("owner_address") or "Unknown",
+            "Holder count": token.get("holder_count") or "Unknown",
+            "LP holder summary": "See source response; LP lock/burn is not fully established by this summary."
+        }
+        return {"chainId": chain_id, "address": address, "checks": checks, "source": "GoPlus Token Security API", "warning": "Automated flags are incomplete and can be stale or evaded. This is not an audit or proof of safety."}
+    except HTTPException:
+        raise
+    except requests.RequestException as e:
+        raise HTTPException(502, "GoPlus risk lookup unavailable: " + str(e)[:180])
+
 @app.post("/forecast")
 def forecast(req: ForecastRequest):
     try:
