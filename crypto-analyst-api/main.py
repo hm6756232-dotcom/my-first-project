@@ -196,14 +196,99 @@ def marketdata(symbol: str):
         "depthLevels": 20, "note": "Order-book depth is a snapshot and can change rapidly."
     }
 
-# Successful Futures snapshots are cached briefly to avoid repeated upstream calls.
+# Public multi-exchange derivatives aggregation. Short cache protects upstream rate limits.
 _derivatives_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 _derivatives_cooldown: dict[str, float] = {}
+
+def _get_json(url: str, params: dict | None = None, timeout: int = 8):
+    response = requests.get(url, params=params, timeout=timeout, headers={"User-Agent":"ORIGINVAULT-CryptoAnalyst/1.0"})
+    response.raise_for_status()
+    return response.json()
+
+def _number(value):
+    try:
+        return float(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+def _binance_derivatives(symbol: str):
+    root = "https://fapi.binance.com"
+    out = {"exchange":"Binance USD-M","status":"unavailable","openInterestUsd":None,"fundingRate":None,
+           "longRatio":None,"shortRatio":None,"markPrice":None,"indexPrice":None,"timestamp":None,"error":None}
+    try:
+        p = _get_json(root + "/fapi/v1/premiumIndex", {"symbol":symbol})
+        oi = _get_json(root + "/fapi/v1/openInterest", {"symbol":symbol})
+        funding = _get_json(root + "/fapi/v1/fundingRate", {"symbol":symbol,"limit":1})
+        out.update(status="ok", markPrice=_number(p.get("markPrice")), indexPrice=_number(p.get("indexPrice")),
+                   fundingRate=_number(p.get("lastFundingRate")) if p.get("lastFundingRate") is not None else (_number(funding[-1].get("fundingRate")) if funding else None),
+                   openInterestUsd=(_number(oi.get("openInterest")) or 0) * (_number(p.get("markPrice")) or 0),
+                   timestamp=p.get("time") or oi.get("time"))
+        try:
+            ratio = _get_json(root + "/futures/data/globalLongShortAccountRatio", {"symbol":symbol,"period":"1h","limit":1})
+            if ratio:
+                out["longRatio"] = _number(ratio[-1].get("longAccount"))
+                out["shortRatio"] = _number(ratio[-1].get("shortAccount"))
+        except Exception as e:
+            out["ratioNote"] = "Long/short ratio unavailable: " + str(e)[:100]
+    except Exception as e:
+        out["error"] = str(e)[:180]
+    return out
+
+def _bybit_derivatives(symbol: str):
+    root = "https://api.bybit.com/v5/market"
+    out = {"exchange":"Bybit Linear","status":"unavailable","openInterestUsd":None,"fundingRate":None,
+           "longRatio":None,"shortRatio":None,"markPrice":None,"indexPrice":None,"timestamp":None,"error":None}
+    try:
+        ticker = _get_json(root + "/tickers", {"category":"linear","symbol":symbol})
+        rows = ((ticker.get("result") or {}).get("list") or [])
+        if not rows:
+            raise ValueError("No Bybit linear perpetual for this symbol")
+        t = rows[0]
+        oi_value = _number(t.get("openInterestValue"))
+        if oi_value is None:
+            oi_value = (_number(t.get("openInterest")) or 0) * (_number(t.get("markPrice")) or 0)
+        out.update(status="ok", openInterestUsd=oi_value, fundingRate=_number(t.get("fundingRate")),
+                   markPrice=_number(t.get("markPrice")), indexPrice=_number(t.get("indexPrice")),
+                   timestamp=int(__import__("time").time()*1000))
+        try:
+            ratio = _get_json(root + "/account-ratio", {"category":"linear","symbol":symbol,"period":"1h","limit":1})
+            rrows = ((ratio.get("result") or {}).get("list") or [])
+            if rrows:
+                out["longRatio"] = _number(rrows[0].get("buyRatio"))
+                out["shortRatio"] = _number(rrows[0].get("sellRatio"))
+        except Exception as e:
+            out["ratioNote"] = "Long/short ratio unavailable: " + str(e)[:100]
+    except Exception as e:
+        out["error"] = str(e)[:180]
+    return out
+
+def _okx_derivatives(symbol: str):
+    root = "https://www.okx.com/api/v5/public"
+    out = {"exchange":"OKX SWAP","status":"unavailable","openInterestUsd":None,"fundingRate":None,
+           "longRatio":None,"shortRatio":None,"markPrice":None,"indexPrice":None,"timestamp":None,"error":None}
+    base = symbol[:-4] if symbol.endswith("USDT") else symbol[:-3] if symbol.endswith("USD") else symbol
+    inst = base + "-USDT-SWAP"
+    try:
+        oi = _get_json(root + "/open-interest", {"instType":"SWAP","instId":inst})
+        oirows = oi.get("data") or []
+        funding = _get_json(root + "/funding-rate", {"instId":inst})
+        frows = funding.get("data") or []
+        if not oirows and not frows:
+            raise ValueError("No OKX swap market for this symbol")
+        o = oirows[0] if oirows else {}
+        f = frows[0] if frows else {}
+        oi_usd = _number(o.get("oiUsd"))
+        if oi_usd is None:
+            oi_usd = _number(o.get("oi"))
+        out.update(status="ok", openInterestUsd=oi_usd, fundingRate=_number(f.get("fundingRate")),
+                   timestamp=_number(o.get("ts") or f.get("fundingTime")))
+    except Exception as e:
+        out["error"] = str(e)[:180]
+    return out
 
 @app.get("/derivatives/{symbol}")
 def derivatives(symbol: str):
     import time
-    from email.utils import parsedate_to_datetime
     symbol = symbol.upper()
     if not symbol.isalnum() or len(symbol) > 20:
         raise HTTPException(400, "Invalid derivatives symbol")
@@ -211,51 +296,30 @@ def derivatives(symbol: str):
     cached = _derivatives_cache.get(symbol)
     if cached and now - cached[0] < 30:
         return {**cached[1], "cached": True}
-    blocked_until = _derivatives_cooldown.get(symbol, 0)
-    if now < blocked_until:
-        return {"available": False, "symbol": symbol, "rateLimited": True,
-                "retryAfterSeconds": max(1, int(blocked_until-now)),
-                "error": "Binance rate limit cooldown is active; wait before retrying.",
-                "markPrice": None, "indexPrice": None, "openInterest": None,
-                "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
-    base = "https://fapi.binance.com/fapi/v1"
-    try:
-        premium = requests.get(base + "/premiumIndex", params={"symbol": symbol}, timeout=10)
-        premium.raise_for_status()
-        p = premium.json()
-        oi = requests.get(base + "/openInterest", params={"symbol": symbol}, timeout=10)
-        oi.raise_for_status()
-        interest = oi.json()
-        funding = requests.get(base + "/fundingRate", params={"symbol": symbol, "limit": 1}, timeout=10)
-        funding.raise_for_status()
-        fdata = funding.json()
-        # Public REST liquidation history is not available via allForceOrders.
-        result = {"available": True, "symbol": symbol, "markPrice": float(p.get("markPrice") or 0),
-                  "indexPrice": float(p.get("indexPrice") or 0), "openInterest": float(interest.get("openInterest") or 0),
-                  "fundingRate": float(fdata[-1].get("fundingRate")) if fdata else None,
-                  "longLiquidationsUsd": None, "shortLiquidationsUsd": None,
-                  "liquidationDataAvailable": False,
-                  "note": "Mark price, index price, open interest and funding rate are public Futures REST data. Public REST liquidation history requires the public forceOrder WebSocket stream."}
-        _derivatives_cache[symbol] = (time.time(), result)
-        _derivatives_cooldown.pop(symbol, None)
-        return result
-    except requests.RequestException as e:
-        response = getattr(e, "response", None)
-        if response is not None and response.status_code == 429:
-            retry = response.headers.get("Retry-After", "60")
-            try:
-                wait_seconds = max(30, min(900, int(float(retry))))
-            except (TypeError, ValueError):
-                wait_seconds = 60
-            _derivatives_cooldown[symbol] = time.time() + wait_seconds
-            return {"available": False, "symbol": symbol, "rateLimited": True,
-                    "retryAfterSeconds": wait_seconds,
-                    "error": "Binance returned HTTP 429. Requests are paused to respect its rate limit.",
-                    "markPrice": None, "indexPrice": None, "openInterest": None,
-                    "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
-        return {"available": False, "symbol": symbol, "error": str(e)[:160],
-                "markPrice": None, "indexPrice": None, "openInterest": None,
-                "fundingRate": None, "longLiquidationsUsd": None, "shortLiquidationsUsd": None}
+    # Query sources independently: one exchange failure must not hide the others.
+    sources = [_binance_derivatives(symbol), _bybit_derivatives(symbol), _okx_derivatives(symbol)]
+    active = [x for x in sources if x["status"] == "ok"]
+    oi_values = [x["openInterestUsd"] for x in active if x.get("openInterestUsd") is not None]
+    funding_values = [x["fundingRate"] for x in active if x.get("fundingRate") is not None]
+    long_values = [x["longRatio"] for x in active if x.get("longRatio") is not None]
+    short_values = [x["shortRatio"] for x in active if x.get("shortRatio") is not None]
+    result = {
+        "available": bool(active), "symbol": symbol, "sources": sources,
+        "exchangesAvailable": len(active), "exchangesChecked": len(sources),
+        "openInterestUsd": sum(oi_values) if oi_values else None,
+        "averageFundingRate": sum(funding_values)/len(funding_values) if funding_values else None,
+        "averageLongRatio": sum(long_values)/len(long_values) if long_values else None,
+        "averageShortRatio": sum(short_values)/len(short_values) if short_values else None,
+        "markPrice": next((x["markPrice"] for x in active if x.get("markPrice") is not None), None),
+        "indexPrice": next((x["indexPrice"] for x in active if x.get("indexPrice") is not None), None),
+        "fundingRate": next((x["fundingRate"] for x in active if x.get("fundingRate") is not None), None),
+        "openInterest": sum(oi_values) if oi_values else None,
+        "longLiquidationsUsd": None, "shortLiquidationsUsd": None,
+        "liquidationDataAvailable": False,
+        "note": "Open interest is summed across the responding exchanges in USD where supplied or estimated from contract units and mark price. Funding and long/short ratios are cross-exchange arithmetic averages of available values. Liquidation totals are not included because complete public market-wide feeds require exchange WebSockets and are not equivalent to a REST snapshot."
+    }
+    _derivatives_cache[symbol] = (time.time(), result)
+    return result
 
 @app.get("/token-risk/{chain_id}/{address}")
 def token_risk(chain_id: int, address: str):
