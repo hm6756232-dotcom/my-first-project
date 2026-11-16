@@ -1,0 +1,7 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pandas==2.2.3
+numpy==2.2.5
+requests==2.32.3
+google-genai==1.11.0
+torch==2.6.0
