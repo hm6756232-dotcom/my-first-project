@@ -78,6 +78,69 @@ def analyze(req: AnalysisRequest):
     except Exception as e:
         raise HTTPException(502, "Gemini request failed: " + str(e)[:300])
 
+@app.get("/dex-candles/{symbol}/{interval}")
+def dex_candles(symbol: str, interval: str, limit: int = 250):
+    symbol = symbol.upper()
+    if not symbol.isalnum() or len(symbol) > 20:
+        raise HTTPException(400, "Invalid token symbol")
+    interval_map = {
+        "1m": ("minute", 1, 1), "5m": ("minute", 5, 1), "15m": ("minute", 15, 1),
+        "30m": ("minute", 15, 2), "1h": ("hour", 1, 1), "2h": ("hour", 1, 2),
+        "4h": ("hour", 4, 1), "1d": ("day", 1, 1), "1w": ("day", 1, 7)
+    }
+    if interval not in interval_map:
+        raise HTTPException(400, "Unsupported DEX chart timeframe")
+    timeframe, aggregate, combine = interval_map[interval]
+    network_map = {"ethereum":"eth","bsc":"bsc","base":"base","polygon":"polygon_pos",
+                   "arbitrum":"arbitrum","optimism":"optimism","avalanche":"avax","solana":"solana"}
+    try:
+        sr = requests.get("https://api.dexscreener.com/latest/dex/search", params={"q": symbol}, timeout=12)
+        sr.raise_for_status()
+        pairs = sr.json().get("pairs") or []
+        matches = []
+        for pair in pairs:
+            base_match = (pair.get("baseToken",{}).get("symbol","").upper() == symbol)
+            quote_match = (pair.get("quoteToken",{}).get("symbol","").upper() == symbol)
+            if base_match or quote_match:
+                liquidity = float((pair.get("liquidity") or {}).get("usd") or 0)
+                matches.append((liquidity, pair, "base" if base_match else "quote"))
+        if not matches:
+            raise HTTPException(404, "No DEX pool found for this token symbol")
+        matches.sort(key=lambda x:x[0], reverse=True)
+        liquidity, pair, token_side = matches[0]
+        network = network_map.get(pair.get("chainId"))
+        if not network:
+            raise HTTPException(422, "DEX pool network is not supported by GeckoTerminal")
+        pool = pair.get("pairAddress")
+        gr = requests.get(
+            f"https://api.geckoterminal.com/api/v2/networks/{network}/pools/{pool}/ohlcv/{timeframe}",
+            params={"aggregate":aggregate,"limit":min(1000, max(60, limit*combine)),"currency":"usd","token":token_side},
+            headers={"Accept":"application/json;version=20230203"}, timeout=20
+        )
+        gr.raise_for_status()
+        raw = ((gr.json().get("data") or {}).get("attributes") or {}).get("ohlcv_list") or []
+        bars = sorted(raw, key=lambda x:x[0])
+        if combine > 1:
+            grouped=[]
+            for i in range(0, len(bars), combine):
+                chunk=bars[i:i+combine]
+                if len(chunk) != combine:
+                    continue
+                grouped.append([chunk[0][0],chunk[0][1],max(x[2] for x in chunk),min(x[3] for x in chunk),chunk[-1][4],sum(x[5] for x in chunk)])
+            bars=grouped
+        bars=bars[-min(500,max(60,limit)):]
+        if len(bars)<30:
+            raise HTTPException(404, "Not enough DEX OHLCV history for this pool")
+        candles=[{"time":int(x[0])*1000,"open":float(x[1]),"high":float(x[2]),"low":float(x[3]),"close":float(x[4]),"volume":float(x[5])} for x in bars]
+        return {"symbol":symbol,"source":"GeckoTerminal DEX OHLCV","network":network,"dex":pair.get("dexId"),
+                "pairAddress":pool,"pairUrl":pair.get("url"),"liquidityUsd":liquidity,
+                "volume24h":float((pair.get("volume") or {}).get("h24") or 0),"candles":candles,
+                "volumeUnit":"USD","warning":"DEX pool selection uses symbol matching and highest reported liquidity. Verify token contract and pool address before relying on this market."}
+    except HTTPException:
+        raise
+    except requests.RequestException as e:
+        raise HTTPException(502, "DEX candle source unavailable: " + str(e)[:180])
+
 @app.get("/marketdata/{symbol}")
 def marketdata(symbol: str):
     symbol = symbol.upper()
