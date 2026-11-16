@@ -203,8 +203,8 @@ def token_risk(chain_id: int, address: str):
             "Other reported risks": token.get("other_potential_risks") or "None reported",
             "Owner address": token.get("owner_address") or "Unknown",
             "Holder count": token.get("holder_count") or "Unknown",
-            "Top 10 holder concentration": Array.isArray(token.holders) ? (100*token.holders.slice(0,10).reduce((s,h)=>s+Number(h.percent||0),0)).toFixed(2)+"%" : "Unknown",
-            "LP locked/burned share (reported)": Array.isArray(token.lp_holders) ? (100*sum(float(h.get("percent") or 0) for h in token.lp_holders if str(h.get("is_locked"))=="1")).__round__(2).__str__()+"%" : "Unknown"
+            "Top 10 holder concentration": f"{100*sum(float(h.get('percent') or 0) for h in token.get('holders', [])[:10]):.2f}%" if isinstance(token.get("holders"), list) else "Unknown",
+            "LP locked share (reported)": f"{100*sum(float(h.get('percent') or 0) for h in token.get('lp_holders', []) if str(h.get('is_locked')) == '1'):.2f}%" if isinstance(token.get("lp_holders"), list) else "Unknown"
         }
         return {"chainId": chain_id, "address": address, "checks": checks, "source": "GoPlus Token Security API", "warning": "Automated flags are incomplete and can be stale or evaded. This is not an audit or proof of safety."}
     except HTTPException:
