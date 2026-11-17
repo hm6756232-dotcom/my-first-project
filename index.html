@@ -31,7 +31,7 @@
 .assistant-art-node.node-one{top:19px;left:calc(50% - 61px)}.assistant-art-node.node-two{bottom:18px;right:calc(50% - 68px);background:#65e2d1}
 @keyframes assistantOrbit{to{rotate:360deg}}@keyframes assistantPulse{0%,100%{transform:scale(.94) rotate(0);box-shadow:0 0 22px #8e7dff66}50%{transform:scale(1.06) rotate(45deg);box-shadow:0 0 42px #8e7dffaa}}
 @media(prefers-reduced-motion:reduce){.assistant-art-orbit,.assistant-art-core,.assistant-art-pulse{animation:none!important}}
-.gateway-options{grid-template-columns:repeat(6,minmax(0,1fr))}.gateway-option{grid-column:span 3}.assistant-option{grid-column:2/span 4}
+.gateway-options{grid-template-columns:repeat(6,minmax(0,1fr))}.gateway-option{grid-column:span 3}.assistant-option{grid-column:span 3}
 @media(max-width:680px){.gateway-options{grid-template-columns:1fr}.gateway-option,.assistant-option{grid-column:1}}
 
 </style>
@@ -51,12 +51,34 @@
       <span class="featured-token-mark"><img id="originVaultHomeLogo" alt="OriginVault token logo" hidden><b id="originVaultHomeFallback">O</b><i></i></span><span class="featured-token-enter">EXPLORE PROJECT ↗</span>
     </a>
     <div class="gateway-options">
-      <a class="gateway-option media-option" href="/ai.html">
-        <div class="gateway-option-art media-art"><span class="media-art-ring"></span><span class="media-art-core">◈</span><span class="art-orbit-dot"></span><span class="art-scanline"></span></div>
-        <div class="gateway-option-meta"><span>01 / DIGITAL MEDIA</span><span class="gateway-arrow">↗</span></div>
-        <h2>MEDIA<br>AUTHENTICITY</h2>
-        <p>Investigate images, video and audio for AI-generated signals, file provenance and exact-file comparison.</p>
-        <div class="gateway-option-foot"><span>IMAGE · VIDEO · AUDIO</span><b>ENTER SYSTEM →</b></div>
+__TEMP_MEDIA__
+      <a class="gateway-option token-option" href="/token-intelligence.html">
+        <div class="gateway-option-art token-art"><span class="token-art-grid"></span><span class="token-art-ring ring-one"></span><span class="token-art-ring ring-two"></span><span class="token-art-core">₿</span><span class="token-art-node node-one"></span><span class="token-art-node node-two"></span><span class="token-art-node node-three"></span></div>
+        <div class="gateway-option-meta"><span>02 / BLOCKCHAIN ASSETS</span><span class="gateway-arrow">↗</span></div>
+        <h2>TOKEN<br>INTELLIGENCE</h2>
+        <p>Examine smart-contract risk, tokenomics, liquidity, holders, market signals and project fundamentals.</p>
+        <div class="gateway-option-foot"><span>MULTI-CHAIN · DEEP ANALYSIS</span><b>ENTER SYSTEM →</b></div>
+      </a>
+      <a class="gateway-option evidence-option" href="/evidence-comparison.html">
+        <div class="gateway-option-art evidence-art"><span class="evidence-art-orbit orbit-a"></span><span class="evidence-art-orbit orbit-b"></span><span class="evidence-art-core">⇄</span><span class="evidence-art-spark spark-a"></span><span class="evidence-art-spark spark-b"></span><span class="evidence-art-beam"></span></div>
+        <div class="gateway-option-meta"><span>03 / DIGITAL EVIDENCE</span><span class="gateway-arrow">↗</span></div>
+        <h2>EVIDENCE<br>COMPARISON LAB</h2>
+        <p>Compare two files with SHA-256 fingerprints and byte-level verification. Private, local and free.</p>
+        <div class="gateway-option-foot"><span>SHA-256 · EXACT FILE MATCH</span><b>ENTER LAB →</b></div>
+      </a>
+      <a class="gateway-option crypto-option" href="/crypto-analyst.html">
+        <div class="gateway-option-art token-art"><span class="token-art-grid"></span><span class="token-art-ring ring-one"></span><span class="token-art-ring ring-two"></span><span class="token-art-core">⌁</span><span class="token-art-node node-one"></span><span class="token-art-node node-two"></span><span class="token-art-node node-three"></span></div>
+        <div class="gateway-option-meta"><span>04 / MARKET FORECASTING</span><span class="gateway-arrow">↗</span></div>
+        <h2>AI CRYPTO<br>ANALYST</h2>
+        <p>Compare technical signals, Gemini market interpretation and Kronos candle forecasting in one workspace.</p>
+        <div class="gateway-option-foot"><span>ALGORITHMIC · GEMINI · KRONOS</span><b>ENTER ANALYST →</b></div>
+      </a>
+      <a class="gateway-option assistant-option" href="/ai-assistant.html">
+        <div class="gateway-option-art assistant-art"><span class="assistant-art-orbit orbit-one"></span><span class="assistant-art-orbit orbit-two"></span><span class="assistant-art-core">✧</span><span class="assistant-art-pulse"></span><span class="assistant-art-node node-one"></span><span class="assistant-art-node node-two"></span></div>
+        <div class="gateway-option-meta"><span>05 / CROSS-SYSTEM INTELLIGENCE</span><span class="gateway-arrow">↗</span></div>
+        <h2>ORIGINVAULT AI<br>ASSISTANT</h2>
+        <p>Your intelligent guide across every OriginVault system. Ask questions, understand results and find the right tools in one conversation.</p>
+        <div class="gateway-option-foot"><span>AI CHAT · SYSTEM GUIDE · SUPPORT</span><b>MEET YOUR AI →</b></div>
       </a>
       <a class="gateway-option token-option" href="/token-intelligence.html">
         <div class="gateway-option-art token-art"><span class="token-art-grid"></span><span class="token-art-ring ring-one"></span><span class="token-art-ring ring-two"></span><span class="token-art-core">₿</span><span class="token-art-node node-one"></span><span class="token-art-node node-two"></span><span class="token-art-node node-three"></span></div>
@@ -71,6 +93,13 @@
         <h2>EVIDENCE<br>COMPARISON LAB</h2>
         <p>Compare two files with SHA-256 fingerprints and byte-level verification. Private, local and free.</p>
         <div class="gateway-option-foot"><span>SHA-256 · EXACT FILE MATCH</span><b>ENTER LAB →</b></div>
+      </a>
+      <a class="gateway-option media-option" href="/ai.html">
+        <div class="gateway-option-art media-art"><span class="media-art-ring"></span><span class="media-art-core">◈</span><span class="art-orbit-dot"></span><span class="art-scanline"></span></div>
+        <div class="gateway-option-meta"><span>01 / DIGITAL MEDIA</span><span class="gateway-arrow">↗</span></div>
+        <h2>MEDIA<br>AUTHENTICITY</h2>
+        <p>Investigate images, video and audio for AI-generated signals, file provenance and exact-file comparison.</p>
+        <div class="gateway-option-foot"><span>IMAGE · VIDEO · AUDIO</span><b>ENTER SYSTEM →</b></div>
       </a>
       <a class="gateway-option crypto-option" href="/crypto-analyst.html">
         <div class="gateway-option-art token-art"><span class="token-art-grid"></span><span class="token-art-ring ring-one"></span><span class="token-art-ring ring-two"></span><span class="token-art-core">⌁</span><span class="token-art-node node-one"></span><span class="token-art-node node-two"></span><span class="token-art-node node-three"></span></div>
