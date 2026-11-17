@@ -426,7 +426,7 @@ You know these sections:
 3) Evidence Comparison Lab (/evidence-comparison.html): local browser-based file comparison using SHA-256, byte-level checks and perceptual image similarity; selected files are processed in the browser, not uploaded by this assistant.
 4) AI Crypto Analyst (/crypto-analyst.html): technical indicators, market data and experimental scenarios. Heuristic scores and model output are not financial advice.
 5) OriginVault token overview (/token-project.html): official ORIGINVAI project information.
-6) AI assistant infrastructure (verified implementation details): the backend checks configured provider keys through GET /assistant/health. The current deployment has reported Groq and OpenRouter as configured; do not assume Gemini is configured unless the health response lists it. Provider priority in the code is Gemini first, then Groq, then OpenRouter. The router tries providers sequentially and moves to the next provider only when the previous call raises an error or returns an empty response. A non-empty response is accepted immediately, even if its quality is poor; there is no quality-based fallback. The POST /assistant/chat response includes a "provider" field naming the provider that actually generated that reply, plus "mode". The website displays that provider name with the assistant message. OpenRouter may itself route to different upstream models/providers, so "OpenRouter" identifies the API gateway used by OriginVault, not necessarily the final underlying inference company. Never claim a provider was used without checking the response's provider field.
+6) AI assistant infrastructure (verified implementation details): the backend checks configured provider keys through GET /assistant/health. The current deployment has reported Groq and OpenRouter as configured; do not assume Gemini is configured unless the health response lists it. Provider priority in the code is Gemini first, then Groq, then OpenRouter, then Cloudflare Workers AI. Cloudflare is included only when both CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are configured. The router tries providers sequentially and moves to the next provider only when the previous call raises an error or returns an empty response. A non-empty response is accepted immediately, even if its quality is poor; there is no quality-based fallback. The POST /assistant/chat response includes a "provider" field naming the provider that actually generated that reply, plus "mode". The website displays that provider name with the assistant message. OpenRouter may itself route to different upstream models/providers, so "OpenRouter" identifies the API gateway used by OriginVault, not necessarily the final underlying inference company. Never claim a provider was used without checking the response's provider field.
 You may guide users step by step, explain concepts and interpret result text they voluntarily paste. You may direct users to the relevant page using its exact path.
 GROUNDING RULES: You do not have automatic live web search or direct access to the site's live databases in this chat endpoint. Never invent current prices, market data, contract status, scan results, citations, source URLs or API status. For time-sensitive or on-chain questions, say you cannot verify live data here and direct the user to the relevant live-data tool or ask them to share its output. Do not present model memory as a verified current fact. If uncertain, say so clearly.
 IMPORTANT LIMITS: You cannot directly operate website tools, inspect a user's private files, change account settings, submit transactions, move funds, execute code, or perform actions on their behalf. Never claim an action was completed. Never request or accept wallet seed phrases, private keys, passwords or recovery codes; tell users not to share them. For crypto, avoid personalized investment recommendations and state uncertainty. Do not claim to have run a scan or comparison unless the user provides its result.
@@ -462,6 +462,7 @@ def assistant_health():
     if os.getenv("GEMINI_API_KEY"): providers.append("Gemini")
     if os.getenv("GROQ_API_KEY"): providers.append("Groq")
     if os.getenv("OPENROUTER_API_KEY"): providers.append("OpenRouter")
+    if os.getenv("CLOUDFLARE_ACCOUNT_ID") and os.getenv("CLOUDFLARE_API_TOKEN"): providers.append("Cloudflare Workers AI")
     return {"ok": True, "service": "originvault-assistant", "providers": providers, "mode": "ai" if providers else "site-guide"}
 
 def _assistant_openai_compatible(base_url: str, key: str, model: str, messages: list[dict], extra_headers: dict | None = None):
@@ -473,6 +474,24 @@ def _assistant_openai_compatible(base_url: str, key: str, model: str, messages: 
     response.raise_for_status()
     data = response.json()
     return data["choices"][0]["message"]["content"]
+
+def _assistant_cloudflare(messages: list[dict]) -> str:
+    account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
+    token = os.getenv("CLOUDFLARE_API_TOKEN")
+    if not account_id or not token:
+        raise RuntimeError("Cloudflare Workers AI is not fully configured")
+    model = os.getenv("CLOUDFLARE_ASSISTANT_MODEL", "@cf/meta/llama-3.1-8b-instruct")
+    url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
+    response = requests.post(url,
+        headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"},
+        json={"messages": messages, "temperature": 0.45, "max_tokens": 850},
+        timeout=40)
+    response.raise_for_status()
+    data = response.json()
+    answer = ((data.get("result") or {}).get("response") or "").strip()
+    if not answer:
+        raise RuntimeError("Cloudflare Workers AI returned an empty response")
+    return answer
 
 def _assistant_gemini(messages: list[dict]) -> str:
     key = os.getenv("GEMINI_API_KEY")
@@ -522,6 +541,8 @@ def assistant_chat(req: AssistantChatRequest, request: Request):
             "https://openrouter.ai/api/v1/chat/completions", os.getenv("OPENROUTER_API_KEY"),
             os.getenv("OPENROUTER_ASSISTANT_MODEL", "openrouter/free"), messages,
             {"HTTP-Referer": "https://originvault.onrender.com", "X-Title": "ORIGINVAULT AI Assistant"})))
+    if os.getenv("CLOUDFLARE_ACCOUNT_ID") and os.getenv("CLOUDFLARE_API_TOKEN"):
+        providers.append(("Cloudflare Workers AI", lambda: _assistant_cloudflare(messages)))
     if not providers:
         return {"reply": _assistant_local_reply(req.message), "provider": "Site Guide",
                 "mode": "guide", "note": "No external AI provider is configured on the server."}
