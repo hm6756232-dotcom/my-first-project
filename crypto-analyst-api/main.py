@@ -465,15 +465,23 @@ def assistant_health():
     if os.getenv("CLOUDFLARE_ACCOUNT_ID") and os.getenv("CLOUDFLARE_API_TOKEN"): providers.append("Cloudflare Workers AI")
     return {"ok": True, "service": "originvault-assistant", "providers": providers, "mode": "ai" if providers else "site-guide"}
 
-def _assistant_openai_compatible(base_url: str, key: str, model: str, messages: list[dict], extra_headers: dict | None = None):
+def _assistant_openai_compatible(base_url: str, key: str, model: str, messages: list[dict], extra_headers: dict | None = None, use_max_completion_tokens: bool = False):
     headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
     if extra_headers: headers.update(extra_headers)
-    response = requests.post(base_url, headers=headers,
-        json={"model": model, "messages": messages, "temperature": 0.45, "max_tokens": 850},
-        timeout=35)
+    payload = {"model": model, "messages": messages, "temperature": 0.45}
+    payload["max_completion_tokens" if use_max_completion_tokens else "max_tokens"] = 850
+    response = requests.post(base_url, headers=headers, json=payload, timeout=35)
     response.raise_for_status()
     data = response.json()
-    return data["choices"][0]["message"]["content"]
+    if data.get("error"):
+        raise RuntimeError(str(data["error"])[:300])
+    choices = data.get("choices") or []
+    if not choices:
+        raise RuntimeError("Provider returned no completion choices")
+    answer = ((choices[0].get("message") or {}).get("content") or "").strip()
+    if not answer:
+        raise RuntimeError("Provider returned an empty message")
+    return answer
 
 def _assistant_cloudflare(messages: list[dict]) -> str:
     account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
@@ -535,7 +543,7 @@ def assistant_chat(req: AssistantChatRequest, request: Request):
     if os.getenv("GROQ_API_KEY"):
         providers.append(("Groq", lambda: _assistant_openai_compatible(
             "https://api.groq.com/openai/v1/chat/completions", os.getenv("GROQ_API_KEY"),
-            os.getenv("GROQ_ASSISTANT_MODEL", "llama-3.3-70b-versatile"), messages)))
+            os.getenv("GROQ_ASSISTANT_MODEL", "openai/gpt-oss-120b"), messages, use_max_completion_tokens=True)))
     if os.getenv("OPENROUTER_API_KEY"):
         providers.append(("OpenRouter", lambda: _assistant_openai_compatible(
             "https://openrouter.ai/api/v1/chat/completions", os.getenv("OPENROUTER_API_KEY"),
