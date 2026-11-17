@@ -480,7 +480,7 @@ def _assistant_cloudflare(messages: list[dict]) -> str:
     token = os.getenv("CLOUDFLARE_API_TOKEN")
     if not account_id or not token:
         raise RuntimeError("Cloudflare Workers AI is not fully configured")
-    model = os.getenv("CLOUDFLARE_ASSISTANT_MODEL", "@cf/meta/llama-3.1-8b-instruct")
+    model = os.getenv("CLOUDFLARE_ASSISTANT_MODEL", "@cf/meta/llama-3.1-8b-instruct-fast")
     url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}"
     response = requests.post(url,
         headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"},
